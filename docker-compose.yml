@@ -1,0 +1,49 @@
+version: "3.2"
+services:
+  # 1 - NODEJS CONTAINER
+  nodejs:
+    build:
+      context: ./src/back/
+    image: marionlnd/ged-script
+    networks:
+      - frontend
+      - backend
+    environment:
+      - MARIADB_HOST=ged-mariadb-app
+      - MARIADB_USER=UserGed
+      - MARIADB_PASS=GEDGROUPE4
+      - MARIADB_DB=GED
+    volumes:
+      - ./www/:/var/www/html/
+    ports:
+      - "30001:8080"
+    container_name: ged-nodejs-app
+  # 2 - MARIADB CONTAINER
+  mysql:
+    image: mariadb:10.5
+    networks:
+      - backend
+    environment:
+      - MARIADB_ROOT_PASSWORD=root
+      - MARIADB_USER=UserGed
+      - MARIADB_PASSWORD=GEDGROUPE4
+      - MARIADB_DATABASE=GED
+    container_name: ged-mariadb-app
+  # 2 - PHPMYADMIN CONTAINER
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:4.7
+    depends_on:
+      - mysql
+    networks:
+      - backend
+    ports:
+      - "30002:80"
+    environment:
+      - PMA_HOST=ged-mariadb-app
+      - PMA_PORT= 3306
+    volumes:
+      - /sessions
+    container_name: ged-phpmyadmin-app
+networks:
+  frontend:
+  backend:
