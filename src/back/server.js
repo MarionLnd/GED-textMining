@@ -32,11 +32,12 @@ app.get("/", async function (req, res) {
 		let queryStr = "SELECT * FROM USER";
 		let rows = await connection.query(queryStr);
 		res.send(rows);
-		// Récupération des chemins fichier
 		fs.readdir(testFolder, (err, files) => {
 			files.forEach(file => {
 				pdfExtract.extract('/Users/user/Desktop/CoursENTP/'+file, options, (err, data) => {
 					if (err) return console.log(err);
+					//console.log(file + " auteur " + data.meta.metadata);
+					console.log(file + " auteur " + data.meta.info.Author);
 				});
 			});
 		});
@@ -48,11 +49,20 @@ app.get("/", async function (req, res) {
 });
 
 app.get("/nouveauDocument", async function (req, res) {
+	const pool = mariadb.createPool(connectionOptions);
 	pool.getConnection()
 		.then(conn => {
 			conn.query("SELECT 1 as val")
 				.then((rows) => {
-					return conn.query('INSERT INTO CATEGORY value (?, ?)', [1, "2017"]);
+					conn.query('INSERT INTO DOCUMENT value (?,?,?,?,?,?,?,?,?,?,?,?)', [data.meta.metadata._metadata.title, "2018"]);
+					/* Récupération des chemins fichier
+					fs.readdir(testFolder, (err, files) => {
+						files.forEach(file => {
+							pdfExtract.extract('/Users/user/Desktop/CoursENTP/'+file, options, (err, data) => {
+								if (err) return console.log(err);
+							});
+						});
+					});*/
 				})
 				.then((res) => {
 					console.log(res);
@@ -63,7 +73,6 @@ app.get("/nouveauDocument", async function (req, res) {
 					console.log(err);
 					conn.end();
 				})
-
 		}).catch(err => {
 		//not connected
 	});
