@@ -32,15 +32,6 @@ app.get("/", async function (req, res) {
 		let queryStr = "SELECT * FROM USER";
 		let rows = await connection.query(queryStr);
 		res.send(rows);
-		fs.readdir(testFolder, (err, files) => {
-			files.forEach(file => {
-				pdfExtract.extract('/Users/user/Desktop/CoursENTP/'+file, options, (err, data) => {
-					if (err) return console.log(err);
-					//console.log(file + " auteur " + data.meta.metadata);
-					console.log(file + " auteur " + data.meta.info.Author);
-				});
-			});
-		});
 	} catch (err) {
 		throw err;
 	} finally {
@@ -54,15 +45,53 @@ app.get("/nouveauDocument", async function (req, res) {
 		.then(conn => {
 			conn.query("SELECT 1 as val")
 				.then((rows) => {
-					conn.query('INSERT INTO DOCUMENT value (?,?,?,?,?,?,?,?,?,?,?,?)', [data.meta.metadata._metadata.title, "2018"]);
-					/* Récupération des chemins fichier
+					/* Récupération des chemins fichier*/
 					fs.readdir(testFolder, (err, files) => {
 						files.forEach(file => {
 							pdfExtract.extract('/Users/user/Desktop/CoursENTP/'+file, options, (err, data) => {
 								if (err) return console.log(err);
+								if (data.meta.metadata !== null)
+								{
+									Object.entries(data.meta.metadata).forEach(([key, value]) => {
+										// console.log(key);
+										// console.log(key.valueOf().creator)
+										console.log(data.meta.metadata[key]['dc:title'])
+										conn.query('INSERT INTO DOCUMENT value (?,?,?,?,?,?,?,?,?,?,?,?)',
+											[data.meta.metadata[key]['dc:title'],
+													file,
+													data.meta.metadata[key]['dc:title'],
+													data.meta.metadata[key]['xmp:createdate'],
+													data.meta.metadata[key]['xmp:modifydate'],
+													' ',
+													'/Users/user/Desktop/CoursENTP/'+file,
+													'',
+													data.meta.metadata[key]['xmpmm:documentid'],
+													'',
+													data.meta.metadata[key]['dc:title'],
+													'']
+										);
+									});
+								}else{
+									conn.query('INSERT INTO DOCUMENT value (?,?,?,?,?,?,?,?,?,?,?,?)',
+										[file,
+											file,
+											'',
+											'',
+											'',
+											' ',
+											'/Users/user/Desktop/CoursENTP/'+file,
+											'',
+											'xmpmm:documentid',
+											'',
+											'dc:title',
+											'']
+										);
+								}
 							});
 						});
-					});*/
+					});
+
+
 				})
 				.then((res) => {
 					console.log(res);
