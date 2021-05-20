@@ -14,13 +14,18 @@ services:
       - MARIADB_PASS=GEDGROUPE4
       - MARIADB_DB=GED
     volumes:
-      - ./www/:/var/www/html/
+      - ./www/:/var/www/html/ # A REVERIFIER MAIS ON N'EN AURA PEUT-ETRE PAS BESOIN A LA FIN
     ports:
       - "30001:8080"
     container_name: ged-nodejs-app
   # 2 - MARIADB CONTAINER
-  mysql:
+  mariadb:
     image: mariadb:10.5
+    ports:
+      - "30002:3306"
+    volumes:
+      - db_data:/var/lib/mariadb
+      - ./src/back/database/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - backend
     environment:
@@ -29,21 +34,25 @@ services:
       - MARIADB_PASSWORD=GEDGROUPE4
       - MARIADB_DATABASE=GED
     container_name: ged-mariadb-app
-  # 2 - PHPMYADMIN CONTAINER
+  # 3 - PHPMYADMIN CONTAINER
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:4.7
     depends_on:
-      - mysql
+      - mariadb
     networks:
       - backend
     ports:
-      - "30002:80"
+      - "30003:80"
     environment:
       - PMA_HOST=ged-mariadb-app
-      - PMA_PORT= 3306
+      - PMA_PORT=3306
     volumes:
       - /sessions
     container_name: ged-phpmyadmin-app
+
 networks:
   frontend:
   backend:
+
+volumes:
+  db_data:

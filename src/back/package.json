@@ -11,6 +11,8 @@
 	"license": "ISC",
 	"dependencies": {
 		"express": "^4.17.1",
-		"mariadb": "^2.5.3"
+		"mariadb": "^2.5.3",
+		"fs": "^0.0.1-security",
+		"pdf.js-extract": "^0.1.5"
 	}
 }
