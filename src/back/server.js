@@ -53,26 +53,44 @@ app.get("/nouveauDocument", async function (req, res) {
 								if (data.meta.metadata !== null)
 								{
 									Object.entries(data.meta.metadata).forEach(([key, value]) => {
-										// console.log(key);
-										// console.log(key.valueOf().creator)
-										console.log(data.meta.metadata[key]['dc:title'])
+										var donnees = [];
+										donnees.push(file)
+										donnees.push(file)
+										if (data.meta.metadata[key]['dc:title'] === undefined) donnees.push(null)
+										else donnees.push(data.meta.metadata[key]['dc:title'])
+										if (data.meta.metadata[key]['xmp:createdate'] === undefined) donnees.push(null)
+										else donnees.push('STR_TO_DATE("' + data.meta.metadata[key]['xmp:createdate'] +' ",'+ "'%Y-%m-%dT%H:%i:%sZ')")
+										if (data.meta.metadata[key]['xmp:modifydate'] === undefined) donnees.push(null)
+										else donnees.push('STR_TO_DATE("' + data.meta.metadata[key]['xmp:modifydate']+' ", ' + " ' %Y-%m-%dT%H:%i:%sZ')")
+										if (data.meta.metadata[key]['dc:creator'] === undefined) donnees.push(null)
+										else donnees.push(data.meta.metadata[key]['dc:creator'])
+										donnees.push(null)
+										donnees.push('/Users/user/Desktop/CoursENTP/'+file)
+										donnees.push(null)
+										if (data.meta.metadata[key]['xmpmm:documentid'] === undefined) donnees.push(null)
+										else donnees.push(data.meta.metadata[key]['xmpmm:documentid'])
+										donnees.push("1")
+										donnees.push("1")
+										console.log(donnees)
+										// console.log(data.meta.metadata[key]['dc:title'])
 										conn.query('INSERT INTO DOCUMENT value (?,?,?,?,?,?,?,?,?,?,?,?)',
-											[data.meta.metadata[key]['dc:title'],
-													file,
-													data.meta.metadata[key]['dc:title'],
-													data.meta.metadata[key]['xmp:createdate'],
-													data.meta.metadata[key]['xmp:modifydate'],
-													' ',
-													'/Users/user/Desktop/CoursENTP/'+file,
-													'',
-													data.meta.metadata[key]['xmpmm:documentid'],
-													'',
-													data.meta.metadata[key]['dc:title'],
-													'']
+											[donnees[0],
+													donnees[1],
+													donnees[2],
+													donnees[3],
+													donnees[4],
+													donnees[5],
+													donnees[6],
+													donnees[7],
+													donnees[8],
+													donnees[9],
+													donnees[10],
+													donnees[11]]
 										);
 									});
 								}else{
-									conn.query('INSERT INTO DOCUMENT value (?,?,?,?,?,?,?,?,?,?,?,?)',
+									console.log("Pas de métadonnées")
+									/*conn.query('INSERT INTO DOCUMENT value (?,?,?,?,?,?,?,?,?,?,?,?)',
 										[file,
 											file,
 											'',
@@ -85,7 +103,7 @@ app.get("/nouveauDocument", async function (req, res) {
 											'',
 											'dc:title',
 											'']
-										);
+										);*/
 								}
 							});
 						});
