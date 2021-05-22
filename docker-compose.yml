@@ -14,7 +14,7 @@ services:
       - MARIADB_PASS=GEDGROUPE4
       - MARIADB_DB=GED
     volumes:
-      - ./www/:/var/www/html/ # A REVERIFIER MAIS ON N'EN AURA PEUT-ETRE PAS BESOIN A LA FIN
+      - ./www:/var/www/html # A REVERIFIER MAIS ON N'EN AURA PEUT-ETRE PAS BESOIN A LA FIN
     ports:
       - "30001:8080"
     container_name: ged-nodejs-app
@@ -49,6 +49,19 @@ services:
     volumes:
       - /sessions
     container_name: ged-phpmyadmin-app
+  # 4 - VUEJS CONTAINER  
+  vuejs:
+    build:
+      context: ./src/front/ged-entp
+      dockerfile : Dockerfile
+    networks:
+      - frontend
+      - backend
+    volumes:
+      - ./www/:/var/www/html/ # A REVERIFIER MAIS ON N'EN AURA PEUT-ETRE PAS BESOIN A LA FIN
+    ports:
+      - "8080:8080"
+    container_name: ged-vuejs-app
 
 networks:
   frontend:

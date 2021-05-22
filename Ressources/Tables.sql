@@ -53,8 +53,8 @@ CREATE TABLE DOCUMENT (
 	link VARCHAR(250) NULL,
 	keywords JSON NULL,
 	signature VARCHAR(200) NULL,
-	id_rule VARCHAR(100) NOT NULL,
-	id_subcategory VARCHAR(100) NOT NULL,
+	id_rule VARCHAR(100)  NULL,
+	id_subcategory VARCHAR(100)  NULL,
 	FOREIGN KEY (id_rule) REFERENCES RULE (id_rule)
 		ON DELETE NO ACTION
 		ON UPDATE NO ACTION,
