@@ -6,7 +6,7 @@
     <h1>GED</h1>
    
     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal"> Connexion </button> <!-- The Modal -->
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal2"> Inscription </button> <!-- The Modal -->
+    <!--button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal2"> Inscription </button> <The Modal -->
     <!--<div class="visiteur"> <a href="/professors" class="linkVisiteur">Liste des professeurs</a> </div>
     <div class="visiteur"> <a href="/branch" class="linkVisiteur">Liste des enseignements</a> </div>
     <div class="visiteur"> <a href="#" class="linkVisiteur">Liste des enseignements non couverts</a> </div>-->
@@ -15,40 +15,21 @@
         <div class="modal-content">
           <!-- Modal Header -->
           <div class="modal-header">
-            <div class="modal-title"><p>Serveur de voeux</p></div>
+            <div class="modal-title"><p>Ged</p></div>
           </div> <!-- Modal body --> 
           <div class="modal-body">
             <p class="title"> Connexion </p>
             <form>
               <div class="input-group"> <input class="input--style-3" type="text" placeholder="Login*" name="email" > </div>
               <div class="input-group"> <input class="input--style-3" type="password" placeholder="Password*" name="password" > </div>
-              <div class="extra"> <a href="#"><u>I forgot my password</u></a> </div>
-              <div class="p-t-10"><button class="btn btn--pill btn--signin" >CONNEXION</button></div>
+            
+              <div class="p-t-10"><button class="btn btn--pill btn--signin" @click="setCookie()" >CONNEXION</button></div>
             </form>
           </div>
         </div>
       </div>
     </div>
-    <div class="modal fade" id="myModal2">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <!-- Modal Header -->
-          <div class="modal-header">
-            <div class="modal-title"><p>Serveur de voeux</p></div>
-          </div> <!-- Modal body -->
-          <div class="modal-body">
-            <p class="title"> Inscription </p>
-          
-            <form>
-              <div class="input-group"> <input class="input--style-3" type="text" placeholder="Email*" name="email" > </div>
-              <div class="input-group"> <input class="input--style-3" type="password" placeholder="Mot de passe*" name="password" ></div>
-              <div class="input-group"> <input class="input--style-3" type="password" placeholder="Confirmer mot de passe*" name="passwordConfirmed"> </div>
-              <div class="p-t-10"><button class="btn btn--pill btn--signin" >S'INSCRIRE</button></div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
+   
   </div>
   </div>
 </template>
@@ -269,7 +250,21 @@ a:link, a:visited, a:hover, a:active{
   border: 2px solid transparent;
   padding-bottom: 1.5%;
 }
-
-
-
 </style>
+
+<script>
+
+export default {
+  name: "login",
+  
+
+  
+  methods: {
+    setCookie() {
+    
+      this.$router.push("/folders");
+    },
+  
+  },
+};
+</script>

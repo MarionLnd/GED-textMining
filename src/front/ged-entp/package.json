@@ -14,7 +14,8 @@
     "jquery": "^3.6.0",
     "popper.js": "^1.16.1",
     "vue": "^2.6.11",
-    "vue-js-modal": "^2.0.0-rc.6"
+    "vue-js-modal": "^2.0.0-rc.6",
+    "vue-router": "^3.4.3"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
