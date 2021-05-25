@@ -17,7 +17,7 @@ CREATE TABLE USER (
 );
 
 CREATE TABLE CATEGORY (
-	id_category INT PRIMARY KEY AUTO_INCREMENT,
+	id_category VARCHAR(100) PRIMARY KEY,
 	name VARCHAR(200) NOT NULL
 );
 
@@ -28,21 +28,20 @@ CREATE TABLE ACTION (
 );
 
 CREATE TABLE RULE (
-	id_rule INT PRIMARY KEY AUTO_INCREMENT,
-	archive_time TIMESTAMP NOT NULL,
-	delete_time TIMESTAMP NOT NULL,
+	id_rule INT PRIMARY KEY,
+	archive_time INT NOT NULL,
+	delete_time INT NOT NULL,
 	archive_rule BOOLEAN NOT NULL,
 	delete_rule BOOLEAN NOT NULL
 );
 
-CREATE TABLE SUB_CATEGORY (
-	id_subcategory INT PRIMARY KEY AUTO_INCREMENT,
-	name VARCHAR(200) NOT NULL,
-	id_category INT NOT NULL,
-	FOREIGN KEY (id_category) REFERENCES CATEGORY(id_category)
-		ON DELETE NO ACTION
-		ON UPDATE NO ACTION
-);
+INSERT INTO RULE VALUE (10, 5, 5, true, true);
+INSERT INTO RULE VALUE (8, 4, 4, true, true);
+INSERT INTO RULE VALUE (6, 3, 3, true, true);
+INSERT INTO RULE VALUE (4, 2, 2, true, true);
+INSERT INTO RULE VALUE (2, 1, 1, true, true);
+INSERT INTO RULE VALUE (100, 0, 0, true, false );
+INSERT INTO RULE VALUE (101, 0, 0, false , true );
 
 CREATE TABLE DOCUMENT (
 	id_document VARCHAR(100) NOT NULL PRIMARY KEY,
@@ -56,21 +55,23 @@ CREATE TABLE DOCUMENT (
 	keywords JSON NULL,
 	signature VARCHAR(200) NULL,
 	id_rule INT NULL,
-	id_subcategory INT NULL,
+	id_category VARCHAR(100) NULL,
+	isArchived BOOLEAN NULL,
+	isDeleted BOOLEAN NULL,
 	FOREIGN KEY (id_rule) REFERENCES RULE (id_rule)
 		ON DELETE NO ACTION
 		ON UPDATE NO ACTION,
-	FOREIGN KEY (id_subcategory) REFERENCES SUB_CATEGORY (id_subcategory)
+	FOREIGN KEY (id_category) REFERENCES CATEGORY (id_category)
 		ON DELETE NO ACTION
 		ON UPDATE NO ACTION
 );
 
 CREATE TABLE CONCERN (
 	id_action INT,
-	id_subcategory INT,
-	PRIMARY KEY (id_action, id_subcategory),
+	id_category VARCHAR(100),
+	PRIMARY KEY (id_action, id_category),
 	FOREIGN KEY (id_action) REFERENCES ACTION (id_action),
-	FOREIGN KEY (id_subcategory) REFERENCES SUB_CATEGORY (id_subcategory)
+	FOREIGN KEY (id_category) REFERENCES CATEGORY (id_category)
 );
 
 CREATE TABLE EXECUTE (
@@ -80,3 +81,4 @@ CREATE TABLE EXECUTE (
 	FOREIGN KEY (id_action) REFERENCES ACTION (id_action),
 	FOREIGN KEY (id_user) REFERENCES USER (id_user)
 );
+

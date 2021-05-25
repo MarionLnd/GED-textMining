@@ -90,14 +90,21 @@ app.get("/nouveauDocument", async function (req, res) {
 												else
 													donnees.push(data.pdfInfo.fingerprint);
 												//id_rule
-												donnees.push(null);
-												//id_subcategory
-												donnees.push(null);
-
-												console.log(donnees)
-
+												donnees.push(10);
+												//id_category
+												if(donnees[3] === null){
+													conn.query("INSERT IGNORE INTO CATEGORY value (?,?)", ["Inconnu", "Date_Document_Inconnu"])
+													donnees.push("Inconnu")
+												}
+												else{
+													conn.query("INSERT IGNORE INTO CATEGORY value (?,?)", [donnees[3].substring(0,4), "Document_"+donnees[3].substring(0,4)])
+													donnees.push(donnees[3].substring(0,4))}
+												// Archivé
+												donnees.push(false)
+												// Supprimé
+												donnees.push(false)
 												conn.query(
-													"INSERT IGNORE INTO DOCUMENT value (?,?,?,?,?,?,?,?,?,?,?,?)",
+													"INSERT IGNORE INTO DOCUMENT value (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
 													[
 														donnees[0],
 														donnees[1],
@@ -111,6 +118,8 @@ app.get("/nouveauDocument", async function (req, res) {
 														donnees[9],
 														donnees[10],
 														donnees[11],
+														donnees[12],
+														donnees[13]
 													]
 												);
 											}
@@ -163,13 +172,22 @@ app.get("/nouveauDocument", async function (req, res) {
 												else
 													meta.push(data.pdfInfo.fingerprint);
 												// ID-Rule
-												meta.push(null);
+												meta.push(10);
 												// ID Sub
-												meta.push(null);
+												if(meta[3] === null){
+													conn.query("INSERT IGNORE INTO CATEGORY value (?,?)", ["Inconnu", "Date_Document_Inconnu"])
+													meta.push("Inconnu")
+												}
+												else{
+													conn.query("INSERT IGNORE INTO CATEGORY value (?,?)", [meta[3].substring(0,4), "Document_"+meta[3].substring(0,4)])
+													meta.push(meta[3].substring(0,4));}
+												// Archivé
+												meta.push(false)
+												// Supprimé
+												meta.push(false)
 
-												console.log(meta)
 												conn.query(
-													"INSERT IGNORE INTO DOCUMENT value (?,?,?,?,?,?,?,?,?,?,?,?)",
+													"INSERT IGNORE INTO DOCUMENT value (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
 													[
 														meta[0],
 														meta[1],
@@ -183,6 +201,8 @@ app.get("/nouveauDocument", async function (req, res) {
 														meta[9],
 														meta[10],
 														meta[11],
+														meta[12],
+														meta[13]
 													]
 												);
 											}
@@ -234,13 +254,21 @@ app.get("/nouveauDocument", async function (req, res) {
 										else
 											infos.push(data.pdfInfo.fingerprint);
 										// Rule
-										infos.push(null);
+										infos.push(10);
 										// Sub
-										infos.push(null)
-
-										console.log(infos)
+										if(infos[3] === null){
+											conn.query("INSERT IGNORE INTO CATEGORY value (?,?)", ["Inconnu", "Date_Document_Inconnu"])
+											infos.push("Inconnu")}
+										else{
+											conn.query("INSERT IGNORE INTO CATEGORY value (?,?)", [infos[3].substring(0,4), "Document_"+infos[3].substring(0,4)])
+											infos.push(infos[3].substring(0,4))
+										}
+										// Archivé
+										infos.push(false)
+										// Supprimé
+										infos.push(false)
 										conn.query(
-											"INSERT IGNORE INTO DOCUMENT value (?,?,?,?,?,?,?,?,?,?,?,?)",
+											"INSERT IGNORE INTO DOCUMENT value (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
 											[
 												infos[0],
 												infos[1],
@@ -254,6 +282,8 @@ app.get("/nouveauDocument", async function (req, res) {
 												infos[9],
 												infos[10],
 												infos[11],
+												infos[12],
+												infos[13]
 											]
 										);
 									}
@@ -289,13 +319,17 @@ app.get("/nouveauDocument", async function (req, res) {
 										else
 											pasInfos.push(data.pdfInfo.fingerprint);
 										//	id_rule INT NULL,
-										pasInfos.push(null)
+										pasInfos.push(10)
 										//	id_subcategory INT NULL,*/
+										conn.query("INSERT IGNORE INTO CATEGORY value (?,?)", ["Inconnu", "Date_Document_Inconnu"])
 										pasInfos.push(null)
+										// Archivé
+										meta.push(false)
+										// Supprimé
+										meta.push(false)
 
-										console.log(pasInfos)
 										conn.query(
-											"INSERT IGNORE INTO DOCUMENT value (?,?,?,?,?,?,?,?,?,?,?,?)",
+											"INSERT IGNORE INTO DOCUMENT value (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
 											[
 												pasInfos[0],
 												pasInfos[1],
@@ -309,6 +343,8 @@ app.get("/nouveauDocument", async function (req, res) {
 												pasInfos[9],
 												pasInfos[10],
 												pasInfos[11],
+												pasInfos[12],
+												pasInfos[13]
 											]
 										)
 									}
