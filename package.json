@@ -1,7 +1,10 @@
 {
   "dependencies": {
+    "body-parser": "^1.19.0",
+    "elasticsearch": "^16.7.2",
     "express": "^4.17.1",
     "fs": "^0.0.1-security",
+    "loader": "^2.1.1",
     "mariadb": "^2.5.3",
     "pdf.js-extract": "^0.1.5"
   }

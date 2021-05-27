@@ -14,8 +14,8 @@ services:
       - MARIADB_PASS=GEDGROUPE4
       - MARIADB_DB=GED
     volumes:
-      - /Users/user/Desktop/CoursENTP:/var/www/html # A REVERIFIER MAIS ON N'EN AURA PEUT-ETRE PAS BESOIN A LA FIN
-
+      - C:\Users\houra\Documents\GED_PDF:/var/www/html # A REVERIFIER MAIS ON N'EN AURA PEUT-ETRE PAS BESOIN A LA FIN
+    #  -./././Usershoura\Documents\GED_PDF
     ports:
       - "30001:8080"
     container_name: ged-nodejs-app

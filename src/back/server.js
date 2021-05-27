@@ -2,6 +2,7 @@ const mariadb = require("mariadb");
 const express = require("express");
 const PDFExtract = require("pdf.js-extract").PDFExtract;
 const fs = require("fs");
+const { table } = require("console");
 const pdfExtract = new PDFExtract();
 const options = {}; /* see below */
 const testFolder = "/var/www/html/";
@@ -22,6 +23,16 @@ const connectionOptions = {
 	database: mariadbDB,
 };
 
+fs.readdir(testFolder, (err, files) => {
+	if (err)
+	  console.log(err);
+	else {
+	  console.log("Current directory filenames:");
+	  files.forEach(file => {
+		console.log("$$$$ this is file "+file);
+	  })
+	}
+  })
 app.get("/", async function (req, res) {
 	console.log("MARIADB Connection config:");
 	console.log(connectionOptions);
@@ -35,6 +46,7 @@ app.get("/", async function (req, res) {
 
 		res.send(rows);
 		console.log(rows);
+		
 
 		fs.readdir(testFolder, (err, files) => {
 			console.log(files);
@@ -47,6 +59,7 @@ app.get("/", async function (req, res) {
 });
 
 app.get("/nouveauDocument", async function (req, res) {
+	console.log("Je traite");
 	const pool = mariadb.createPool(connectionOptions);
 	pool
 		.getConnection()
@@ -112,7 +125,7 @@ app.get("/nouveauDocument", async function (req, res) {
 												donnees.push(null);
 												donnees.push(null);
 												console.log("OK");
-												/*conn.query(
+												conn.query(
 													"INSERT IGNORE INTO DOCUMENT value (?,?,?,?,?,?,?,?,?,?,?,?)",
 													[
 														donnees[0],
@@ -128,7 +141,7 @@ app.get("/nouveauDocument", async function (req, res) {
 														donnees[10],
 														donnees[11],
 													]
-												);*/
+												);
 											}
 										);
 									}
@@ -172,6 +185,63 @@ app.get("/nouveauDocument", async function (req, res) {
 			console.error("Error: Not connected - ", err);
 		});
 });
+
+// Modification de métadonnées
+
+app.post("/updateDocument", async function (req, res) {
+	console.log("MARIADB Connection config:");
+	console.log(connectionOptions);
+	const pool = mariadb.createPool(connectionOptions);
+	let con;
+
+	try{
+		con= await pool.getConnection();
+		    //var req="update DOCUMENT set filename=?,title=?,modification_date=?, id_subcategory=? where id_document=?";
+			
+			con.query('select * from category',function(err,rows,fields){
+				if (err) throw err;
+				console.log(rows);
+			})
+			
+			//var req="update document set modification_date=current_timestamp() where id_document=?";
+			//con.query(req,[ ('?', '?','?', '?')],function(err, result){
+			//	if (err) throw err;
+			//	console.log(result.affectedRows + "Document modifié");
+			//});
+	} catch (err){
+		throw err;
+	} finally{
+		if (con) return con.end();
+	}	
+});
+
+
+// Supprimer un document
+
+// Modification de métadonnées
+
+app.delete("/deleteDocument", async function (req, res) {
+	console.log("MARIADB Connection config:");
+	console.log(connectionOptions);
+	const pool = mariadb.createPool(connectionOptions);
+	let con;
+
+	try{
+		con= await pool.getConnection();
+		    var req="delete from DOCUMENT where id_document=?";
+			con.query(req,['Entrepôts de données.pdf'],function(err){
+				if (err) throw err;
+				console.log("suppriméééééééé");
+			})
+			
+			
+	} catch (err){
+		throw err;
+	} finally{
+		if (con) return con.end();
+	}	
+});
+
 
 app.listen(port, function () {
 	console.log("Sample mariaDB app listening on port " + port);
