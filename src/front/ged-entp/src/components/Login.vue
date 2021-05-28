@@ -256,9 +256,6 @@ a:link, a:visited, a:hover, a:active{
 
 export default {
   name: "login",
-  
-
-  
   methods: {
     setCookie() {
     

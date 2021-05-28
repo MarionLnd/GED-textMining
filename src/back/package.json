@@ -10,9 +10,11 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"body-parser": "^1.19.0",
+		"cors": "^2.8.5",
 		"express": "^4.17.1",
-		"mariadb": "^2.5.3",
 		"fs": "^0.0.1-security",
+		"mariadb": "^2.5.3",
 		"pdf.js-extract": "^0.1.5"
 	}
 }
