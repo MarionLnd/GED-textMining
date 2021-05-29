@@ -218,9 +218,9 @@ app.post("/updateDocument", async function (req, res) {
 
 // Supprimer un document
 
-// Modification de métadonnées
 
-app.delete("/deleteDocument", async function (req, res) {
+app.post("/deleteDocument", async function (req, res) {
+	//let id=req.body['id_doc']
 	console.log("MARIADB Connection config:");
 	console.log(connectionOptions);
 	const pool = mariadb.createPool(connectionOptions);
@@ -229,12 +229,11 @@ app.delete("/deleteDocument", async function (req, res) {
 	try{
 		con= await pool.getConnection();
 		    var req="delete from DOCUMENT where id_document=?";
+			//con.query(req,id,function(err){
 			con.query(req,['Entrepôts de données.pdf'],function(err){
 				if (err) throw err;
-				console.log("suppriméééééééé");
-			})
-			
-			
+				console.log("Document supprimé");
+			})		
 	} catch (err){
 		throw err;
 	} finally{
