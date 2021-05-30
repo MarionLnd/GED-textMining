@@ -3,6 +3,8 @@ const express = require("express");
 const PDFExtract = require("pdf.js-extract").PDFExtract;
 const fs = require("fs");
 const bodyParser = require("body-parser");
+const axios = require("axios");
+
 const pdfExtract = new PDFExtract();
 const options = {}; /* see below */
 const testFolder = "/var/www/html/";
@@ -28,21 +30,6 @@ const connectionOptions = {
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(bodyParser.json());
-const dir = "/Users/soukaynamoutaoukil/ged_pdf/";
-if (!fs.existsSync(dir)) {
-	fs.mkdirSync(dir, {
-		recursive: true,
-	});
-}
-fs.readdir(__dirname, (err, files) => {
-	console.log("uais");
-	if (err) console.log(err);
-	else {
-		files.forEach((file) => {
-			console.log("done", file);
-		});
-	}
-});
 
 app.use(function (req, res, next) {
 	res.setHeader("Access-Control-Allow-Origin", "*");
@@ -61,18 +48,8 @@ app.get("/nouveauDocument", async function (req, res) {
 			fs.readdir(testFolder, (err, files) => {
 				if (files !== undefined) {
 					files.forEach((file) => {
-						console.log("File: " + file);
 						pdfExtract.extract(testFolder + file, options, (err, data) => {
 							if (err) return console.log(err);
-							console.log("Data object: ");
-							console.log(data);
-							console.log("---");
-							console.log("Metadata object: ");
-							console.log(data.meta.metadata);
-							console.log("-------------------");
-							console.log("Metadata info object: ");
-							console.log(data.meta.info);
-							console.log("-------------------");
 							if (data.meta.metadata !== null && data.meta.info !== null) {
 								console.log("META + INFO");
 								/*console.log(file)
@@ -128,16 +105,9 @@ app.get("/nouveauDocument", async function (req, res) {
 										);
 									else donnees.push(null);
 									// Author
-									data.meta.metadata[key]["dc:creator"] !== undefined || data.meta.info.Author !== undefined
+									data.meta.metadata[key]["dc:creator"] !== undefined && data.meta.info.Author !== undefined
 										? donnees.push(data.meta.metadata[key]["dc:creator"] || data.meta.info.Author)
 										: donnees.push(null);
-
-									if (data.meta.metadata[key]["dc:creator"] !== undefined && data.meta.info.Author === undefined)
-										donnees.push(data.meta.metadata[key]["dc:creator"]);
-									else if (data.meta.metadata[key]["dc:creator"] === undefined && data.meta.info.Author !== undefined)
-										donnees.push(data.meta.info.Author);
-									else donnees.push(null);
-
 									// Size
 									donnees.push(null);
 									// Link
@@ -263,7 +233,7 @@ app.get("/nouveauDocument", async function (req, res) {
 								else infos.push(data.meta.info.Title);
 								// Date Creation
 								console.log(file);
-								// console.log("Date Info" +data.meta.info.CreationDate)
+								console.log("Date Info" + data.meta.info.CreationDate);
 								if (data.meta.info.CreationDate === undefined) infos.push(null);
 								else
 									infos.push(
@@ -310,6 +280,7 @@ app.get("/nouveauDocument", async function (req, res) {
 								infos.push(false);
 								// Supprimé
 								infos.push(false);
+								console.log(infos[3]);
 								conn.query("INSERT IGNORE INTO DOCUMENT value (?,?,?,?,?,?,?,?,?,?,?,?,?,?)", [
 									infos[0],
 									infos[1],
@@ -510,6 +481,35 @@ app.get("/rules", async function (req, res) {
 	} finally {
 		if (connection) return connection.release();
 	}
+});
+
+app.get("/search-by-author", async (req, res) => {
+	console.log("in route search by author");
+	axios
+		.get("http://localhost:9200/ged-document/_search/", {
+			query: {
+				match: {
+					author: req.query.author,
+				},
+			},
+		})
+		.then((result) => {
+			console.log(result.data);
+			if (result.hits.total.value === 0) {
+				result.status(204).json({
+					total: 0,
+					results: [],
+				});
+			} else {
+				result.status(200).json({
+					total: result.hits.total.value,
+					results: [result.hits.hits],
+				});
+			}
+		})
+		.catch((error) => {
+			console.error(`Echec AXIOS : ${error}`);
+		});
 });
 
 app.listen(port, function () {

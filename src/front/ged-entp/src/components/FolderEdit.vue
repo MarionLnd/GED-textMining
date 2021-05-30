@@ -13,11 +13,11 @@
 					</div>
 					<div class="form-group">
 						<label>date creation</label>
-						<input type="date" class="form-control" aria-describedby="emailHelp" :value="[[info.creation_date]]" id="dateC" />
+						<input type="text" class="form-control" aria-describedby="emailHelp" :value="[[info.creation_date]]" id="dateC" />
 					</div>
 					<div class="form-group">
 						<label>date modification</label>
-						<input type="date" class="form-control" aria-describedby="emailHelp" :value="[[info.modification_date]]" id="dateM" />
+						<input type="text" class="form-control" aria-describedby="emailHelp" :value="[[info.modification_date]]" id="dateM" />
 					</div>
 					<div class="form-group">
 						<label>Auteur</label>
@@ -46,7 +46,7 @@
 					<div class="form-group" v-if="aff">
 						<select class="form-control" id="rule">
 							<option selected disabled :value="info.id_rule">{{ info.description }}</option>
-							<option v-for="rule in rules" :key="rule.id_rule" :value="rule.id_rule">
+							<option v-for="rule in rules" :key="rule" :value="rule.id_rule">
 								{{ rule.description }}
 							</option>
 						</select>
@@ -54,7 +54,7 @@
 					<div class="form-group" v-if="archive">
 						<h5>arch</h5>
 						<select class="form-control" id="rule">
-							<option v-for="rule in archiveRule" :key="rule.id_rule">
+							<option v-for="rule in archiveRule" :key="rule">
 								{{ rule.description }}
 							</option>
 						</select>
@@ -62,13 +62,13 @@
 					<div class="form-group" v-if="supp">
 						<h5>supp</h5>
 						<select class="form-control" id="rule">
-							<option v-for="rule in deleteRule" :key="rule.id_rule" :value="rule.id_rule">
+							<option v-for="rule in deleteRule" :key="rule" :value="rule.id_rule">
 								{{ rule.description }}
 							</option>
 						</select>
 					</div>
 					<div class="form-group">
-						<input type="button" @click="update()" value="Modifier" />
+						<input type="submit" @click="update()" value="Modifier" />
 					</div>
 				</div>
 			</form>
@@ -84,14 +84,9 @@
 
 <script>
 import axios from "axios";
-//import { mdbSelect, mdbContainer } from "mdbvue";
-
+import moment from "moment";
 export default {
 	name: "folder",
-	/* components: {
-      mdbSelect,
-      mdbContainer
-    },*/
 	data() {
 		return {
 			documentData: [],
@@ -103,6 +98,7 @@ export default {
 			aff: false,
 			archive: false,
 			supp: false,
+			sendForm: false,
 		};
 	},
 	mounted() {
@@ -149,18 +145,16 @@ export default {
 				}
 			});
 		});
-
 		// GET METADATA OF DOCUMENT
 		axios.get("http://localhost:30001/document/" + this.$cookies.get("id_doc")).then((response) => {
 			// console.log(this.rules);
-
 			this.all.forEach((element) => {
 				if (response.data[0].id_rule === element.id_rule) {
 					this.documentData.push({
 						filename: response.data[0].filename,
 						title: response.data[0].title,
-						creation_date: response.data[0].creation_date,
-						modification_date: response.data[0].modification_date,
+						creation_date: moment(response.data[0].creation_date).format("YYYY-MM-DD"),
+						modification_date: moment(response.data[0].modification_date).format("YYYY-MM-DD"),
 						author: response.data[0].author,
 						id_rule: element.id_rule,
 						archive_time: element.archive_time,
@@ -188,18 +182,20 @@ export default {
 	},
 	methods: {
 		update() {
+			var date = new Date();
+
 			axios
 				.put("http://localhost:30001/documentUpdate/" + this.$cookies.get("id_doc"), {
 					filename: document.getElementById("filename").value,
 					title: document.getElementById("title").value,
 					creation_date: document.getElementById("dateC").value,
-					modification_date: document.getElementById("dateM").value,
+					modification_date: moment(date).format("YYYY-MM-DD").toString(),
 					author: document.getElementById("auteur").value,
-					keywords: document.getElementById("keyword").value,
 					id_rule: document.getElementById("rule").value,
 				})
 				.then(function (response) {
 					console.log(response);
+					this.sendForm = true;
 				});
 		},
 		getVal() {

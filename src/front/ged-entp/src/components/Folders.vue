@@ -2,25 +2,34 @@
 	<div class="table-responsive">
 		<!-- navbar with links to others pages-->
 
-		<h2>Liste des cours</h2>
+		<h2>Liste des PDFs</h2>
+
 		<table class="table table-bordered table-striped">
 			<thead>
 				<tr>
 					<th>titre</th>
 					<th>date</th>
 					<th>auteur</th>
-					<th>size</th>
+					<th colspan="2">
+						<div class="input-group">
+							<input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
+							<button type="button" class="btn btn-outline-secondary">search</button>
+						</div>
+						<!--button type="button" class="btn btn-secondary btn-lg">Elastic Search</button-->
+					</th>
 				</tr>
 			</thead>
 			<tbody>
-				<tr v-for="item in moduleData" :key="item">
+				<tr v-for="item in moduleDa" :key="item">
 					<td>
 						{{ item.filename }}
 					</td>
-					<td>{{ format(item.creation_date) }}</td>
+					<td>{{ formater(item.creation_date) }}</td>
 					<td>{{ item.author }}</td>
-					<td>{{ item.size }}</td>
-					<td><font-awesome-icon icon="edit" @click="setCookie(item.id_document)" /></td>
+					<td>
+						<font-awesome-icon icon="edit" @click="setCookie(item.id_document)" />
+					</td>
+					<td @click="supprimer(item.id_document, item.delete_rule)">delete</td>
 				</tr>
 			</tbody>
 		</table>
@@ -137,28 +146,62 @@ tbody tr:hover {
 
 <script>
 import axios from "axios";
+import moment from "moment";
 
 export default {
 	name: "folder",
 	data() {
 		return {
-			moduleData: [],
+			moduleDa: [],
 		};
 	},
 
 	mounted() {
+		this.moduleDa = [];
 		axios.get("http://localhost:30001/documents").then((response) => {
 			console.log(response);
 
-			this.moduleData = response.data;
-			//this.data = response.data.data;
-			console.log(this.moduleData[0].filename);
-		});
+			response.data.forEach((doc) => {
+				console.log(response.data);
 
-		axios
-			.get("http://localhost:9200/ged-document/_search/")
-			.then((response) => console.log(response.data))
-			.catch((error) => console.error(error));
+				axios.get("http://localhost:30001/rules").then((rule) => {
+					rule.data.forEach((element) => {
+						if (doc.id_rule === element.id_rule) {
+							var deleteDate = new Date(this.formater(doc.creation_date));
+							deleteDate.setMonth(deleteDate.getMonth() + element.delete_time);
+							var archiveDate = new Date(this.formater(doc.creation_date));
+							// console.log(moment(test).format("YYYY-MM-DD"))
+							archiveDate.setMonth(archiveDate.getMonth() + element.archive_time);
+							var dateA = new Date();
+							console.log(moment(dateA).format("YYYY-MM-DD").toString());
+							//  console.log(moment(test).format("YYYY-MM-DD"))
+
+							//  console.log(moment(test).format("YYYY-MM-DD") > moment(dateA).format("YYYY-MM-DD"))
+							if (
+								moment(archiveDate).format("YYYY-MM-DD") > moment(dateA).format("YYYY-MM-DD") === true ||
+								moment(deleteDate).format("YYYY-MM-DD") > moment(dateA).format("YYYY-MM-DD") === true
+							) {
+								console.log("yes");
+
+								this.moduleDa.push({
+									id_document: doc.id_document,
+									filename: doc.filename,
+									title: doc.title,
+									creation_date: doc.creation_date,
+									modification_date: doc.modification_date,
+									author: doc.author,
+									delete_rule: element.delete_rule,
+									delete_time: deleteDate,
+								});
+							}
+
+							console.log(this.moduleDa);
+						}
+						//this.data = response.data.data;
+					});
+				});
+			});
+		});
 	},
 	methods: {
 		setCookie(id_doc) {
@@ -167,8 +210,20 @@ export default {
 			this.$cookies.set("id_doc", id_doc);
 			this.$router.push("/folderEdit");
 		},
-		format(date) {
+		supprimer(id_doc, rule) {
+			if (rule === 1) {
+				axios
+					.delete("http://localhost:30001/document/" + id_doc)
+					.then((response) => {
+						console.log(response);
+						window.location.reload();
+					})
+					.catch((error) => console.log(error));
+			}
+		},
+		formater(date) {
 			return date.substring(0, 10);
+			//console.log(date.substring(0, 10).getMonth())
 		},
 	},
 };
