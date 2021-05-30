@@ -3,32 +3,16 @@
   <div class="container">
     
     <!-- Button to Open the Modal -->
-    <h1>GED</h1>
-   
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal"> Connexion </button> <!-- The Modal -->
-    <!--button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal2"> Inscription </button> <The Modal -->
-    <!--<div class="visiteur"> <a href="/professors" class="linkVisiteur">Liste des professeurs</a> </div>
-    <div class="visiteur"> <a href="/branch" class="linkVisiteur">Liste des enseignements</a> </div>
-    <div class="visiteur"> <a href="#" class="linkVisiteur">Liste des enseignements non couverts</a> </div>-->
-    <div class="modal fade" id="myModal">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <!-- Modal Header -->
-          <div class="modal-header">
-            <div class="modal-title"><p>Ged</p></div>
-          </div> <!-- Modal body --> 
-          <div class="modal-body">
-            <p class="title"> Connexion </p>
-            <form>
-              <div class="input-group"> <input class="input--style-3" type="text" placeholder="Login*" name="email" > </div>
-              <div class="input-group"> <input class="input--style-3" type="password" placeholder="Password*" name="password" > </div>
-            
-              <div class="p-t-10"><button class="btn btn--pill btn--signin" @click="setCookie()" >CONNEXION</button></div>
-            </form>
-          </div>
-        </div>
-      </div>
-    </div>
+    <h3>GED</h3>
+    <form>
+            <label style="color: white">Identifiant</label>
+            <input type="text" id="professor" v-model="usernameProf" class="form-control" />
+            <label style="color: white">Mot de passe</label>
+            <input type="password" v-model="passwordProf" class="form-control" />
+            <button type="button" class="btn btn-primary"> Connexion </button>
+           
+          </form>
+  
    
   </div>
   </div>
@@ -254,8 +238,15 @@ a:link, a:visited, a:hover, a:active{
 
 <script>
 
+
 export default {
   name: "login",
+  mounted(){
+     let externalScript = document.createElement('script')
+            externalScript.setAttribute('src', 'https://code.jquery.com/jquery-3.2.1.slim.min.js')
+            externalScript.setAttribute('src', 'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js')
+            document.head.appendChild(externalScript)
+  },
   methods: {
     setCookie() {
     

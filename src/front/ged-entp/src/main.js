@@ -15,9 +15,11 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
+
 Vue.config.productionTip = false
 Vue.use(VueRouter)
 Vue.use(VueCookies)
+
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 library.add(faTrashAlt)
 

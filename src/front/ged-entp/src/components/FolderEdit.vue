@@ -1,7 +1,9 @@
 <template>
   <div class="container">
     <div class="card">
+      
       <form>
+         
         <div v-for="info in documentData" :key="info">
           <div class="form-group">
             <label>File Name</label>
@@ -132,7 +134,7 @@
             </select>
           </div>
           <div class="form-group">
-            <input type="button" @click="update()" value="Modifier"> 
+            <input type="submit" @click="update()" value="Modifier"> 
           </div>
         </div>
       </form>
@@ -167,6 +169,7 @@ export default {
       aff: false,
       archive: false,
       supp: false,
+      sendForm:false
     };
   },
   mounted() {
@@ -277,6 +280,7 @@ export default {
           )
           .then(function (response) {
             console.log(response);
+            this.sendForm = true;
           });
     
     },
