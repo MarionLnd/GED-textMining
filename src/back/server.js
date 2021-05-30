@@ -270,7 +270,7 @@ app.get("/nouveauDocument", async function (req, res) {
 										infos.push(data.meta.info.Title);
 									// Date Creation
 									console.log(file)
-									// console.log("Date Info" +data.meta.info.CreationDate)
+									 console.log("Date Info" +data.meta.info.CreationDate)
 									if (data.meta.info.CreationDate === undefined)
 										infos.push(null)
 									else
@@ -313,6 +313,7 @@ app.get("/nouveauDocument", async function (req, res) {
 									infos.push(false)
 									// Supprimé
 									infos.push(false)
+									console.log(infos[3])
 									conn.query(
 										"INSERT IGNORE INTO DOCUMENT value (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
 										[
@@ -490,7 +491,7 @@ app.put("/documentUpdate/:id_document", async (req, res) => {
 				console.log("connected ! connection id is " + conn.threadId);
 				conn.end(); //release to pool
 			}
-			let sql = "UPDATE DOCUMENT SET filename = ?, title = ?, author=?, id_rule=? WHERE id_document = ?"
+			let sql = "UPDATE DOCUMENT SET filename = ?, title = ?, author=? id_rule=? WHERE id_document = ?"
 			let data = [req.body.filename, req.body.title, req.body.author, req.body.id_rule, req.params.id_document];
 
 			conn.query(sql, data, (err, results) => {
@@ -535,6 +536,41 @@ app.get("/rules", async function (req, res) {
 	} finally {
 		if (connection) return connection.release();
 	}
+});
+
+// DELETE DOCUMENT BY ID
+app.delete("/deleteDocument/:id_document", async function (req, res) {
+	const pool = mariadb.createPool(connectionOptions);
+
+	let connection;
+	try {
+		pool.getConnection((err, conn) => {
+			if (err) {
+				console.log("not connected due to error: " + err);
+			} else {
+				console.log("connected ! connection id is " + conn.threadId);
+				conn.end(); //release to pool
+			}
+			let sql = "delete from DOCUMENT where id_document=?"
+				let data = [req.params.id_document];
+	
+				conn.query(sql, data, (err, results) => {
+	
+					if (err) throw err;
+					console.log('Rows affected:', results.affectedRows);
+					res.status(200).json({ Result: "200 - table deleted" })
+	
+				});
+
+		});
+
+
+	} catch (err) {
+		throw err;
+	} finally {
+		if (connection) return connection.release();
+	}
+		
 });
 
 app.listen(port, function () {

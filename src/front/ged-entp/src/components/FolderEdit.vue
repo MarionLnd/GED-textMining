@@ -30,7 +30,7 @@
           <div class="form-group">
             <label>date creation</label>
             <input
-              type="date"
+              type="text"
               class="form-control"
               aria-describedby="emailHelp"
               :value="[[info.creation_date]]"
@@ -40,7 +40,7 @@
           <div class="form-group">
             <label>date modification</label>
             <input
-              type="date"
+              type="text"
               class="form-control"
               aria-describedby="emailHelp"
               :value="[[info.modification_date]]"
@@ -150,14 +150,11 @@
 
 <script>
 import axios from "axios";
-//import { mdbSelect, mdbContainer } from "mdbvue";
+import moment from "moment";
 
 export default {
   name: "folder",
-  /* components: {
-      mdbSelect,
-      mdbContainer
-    },*/
+
   data() {
     return {
       documentData: [],
@@ -230,8 +227,8 @@ export default {
             this.documentData.push({
               filename: response.data[0].filename,
               title: response.data[0].title,
-              creation_date: response.data[0].creation_date,
-              modification_date: response.data[0].modification_date,
+              creation_date: moment(response.data[0].creation_date).format("YYYY-MM-DD"),
+              modification_date: moment(response.data[0].modification_date).format("YYYY-MM-DD"),
               author: response.data[0].author,
               id_rule: element.id_rule,
               archive_time: element.archive_time,
@@ -263,6 +260,7 @@ export default {
   methods: {
     update() {
      
+      var date = new Date();
       
         axios
           .put(
@@ -272,9 +270,8 @@ export default {
               filename: document.getElementById("filename").value,
               title: document.getElementById("title").value,
               creation_date: document.getElementById("dateC").value,
-              modification_date: document.getElementById("dateM").value,
+              modification_date: moment(date).format("YYYY-MM-DD").toString(),
               author: document.getElementById("auteur").value,
-              keywords: document.getElementById("keyword").value,
               id_rule:document.getElementById("rule").value
             }
           )

@@ -40,7 +40,13 @@
               @click="setCookie(item.id_document)"
             />
           </td>
-          <td><font-awesome-icon icon="trashAlt" /></td>
+          <td
+            @click="
+              supprimer(item.id_document, item.delete_rule)
+            "
+          >
+            delete
+          </td>
         </tr>
       </tbody>
     </table>
@@ -180,27 +186,37 @@ export default {
         axios.get("http://localhost:30001/rules").then((rule) => {
           rule.data.forEach((element) => {
             if (doc.id_rule === element.id_rule) {
-              // console.log(this.formater(doc.creation_date))
-              var test = new Date(this.formater(doc.creation_date));
+              var deleteDate = new Date(this.formater(doc.creation_date));
+              deleteDate.setMonth(deleteDate.getMonth() + element.delete_time);
+              var archiveDate = new Date(this.formater(doc.creation_date));
               // console.log(moment(test).format("YYYY-MM-DD"))
-              test.setMonth(test.getMonth() + element.archive_time);
+              archiveDate.setMonth(
+                archiveDate.getMonth() + element.archive_time
+              );
               var dateA = new Date();
+              console.log(moment(dateA).format("YYYY-MM-DD").toString());
               //  console.log(moment(test).format("YYYY-MM-DD"))
 
               //  console.log(moment(test).format("YYYY-MM-DD") > moment(dateA).format("YYYY-MM-DD"))
               if (
-                moment(test).format("YYYY-MM-DD") >
+                (moment(archiveDate).format("YYYY-MM-DD") >
                   moment(dateA).format("YYYY-MM-DD") ===
-                true
+                  true )||
+                (moment(deleteDate).format("YYYY-MM-DD") >
+                  moment(dateA).format("YYYY-MM-DD") ===
+                  true)
               ) {
                 console.log("yes");
 
                 this.moduleDa.push({
+                  id_document: doc.id_document,
                   filename: doc.filename,
                   title: doc.title,
                   creation_date: doc.creation_date,
                   modification_date: doc.modification_date,
                   author: doc.author,
+                  delete_rule: element.delete_rule,
+                  delete_time: deleteDate,
                 });
               }
 
@@ -218,6 +234,17 @@ export default {
       console.log("okaaay");
       this.$cookies.set("id_doc", id_doc);
       this.$router.push("/folderEdit");
+    },
+    supprimer(id_doc, rule) {
+      if (rule === 1) {
+        axios
+          .delete("http://localhost:30001/document/" + id_doc)
+          .then((response) => {
+            console.log(response);
+            window.location.reload();
+          })
+          .catch((error) => console.log(error));
+      }
     },
     formater(date) {
       return date.substring(0, 10);
