@@ -14,7 +14,7 @@ services:
       - MARIADB_PASS=GEDGROUPE4
       - MARIADB_DB=GED
     volumes:
-      - /Users/user/Desktop/CoursENTP:/var/www/html # A REVERIFIER MAIS ON N'EN AURA PEUT-ETRE PAS BESOIN A LA FIN
+      - ./GEDPDF:/var/www/html # A REVERIFIER MAIS ON N'EN AURA PEUT-ETRE PAS BESOIN A LA FIN
 
     ports:
       - "30001:8080"
@@ -58,10 +58,12 @@ services:
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - discovery.type=single-node
+      - network.bind_host=0.0.0.0
     volumes:
       - data01:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
+      - "9300:9300"
     networks:
       - backend
   # 5 - KIBANA CONTAINER
@@ -88,8 +90,8 @@ services:
       - ./src/back/config/mariadb-java-client-2.7.2.jar:/usr/share/logstash/logstash-core/lib/jars/mariadb-java-client-2.7.2.jar
     command: logstash -f /usr/share/logstash/config/logstash.conf
     depends_on:
-        - elasticsearch
-        - mariadb
+      - elasticsearch
+      - mariadb
 
 networks:
   frontend:
