@@ -10,9 +10,11 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"axios": "^0.21.1",
 		"express": "^4.17.1",
-		"mariadb": "^2.5.3",
 		"fs": "^0.0.1-security",
+		"mariadb": "^2.5.3",
+		"node-fetch": "^2.6.1",
 		"pdf.js-extract": "^0.1.5"
 	}
 }

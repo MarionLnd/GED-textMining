@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "express": "^4.17.1",
+    "fs": "^0.0.1-security",
+    "mariadb": "^2.5.3",
+    "pdf.js-extract": "^0.1.5"
+  }
+}
