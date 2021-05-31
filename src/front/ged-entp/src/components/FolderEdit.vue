@@ -59,7 +59,7 @@
 						</select>
 					</div>
 					<div class="form-group" v-if="archive">
-						<h5>arch</h5>
+					
 						<select class="form-control" id="rule">
 							<option v-for="rule in archiveRule" :key="rule">
 								{{ rule.description }}
@@ -67,7 +67,7 @@
 						</select>
 					</div>
 					<div class="form-group" v-if="supp">
-						<h5>supp</h5>
+						
 						<select class="form-control" id="rule">
 							<option v-for="rule in deleteRule" :key="rule" :value="rule.id_rule">
 								{{ rule.description }}

@@ -45,7 +45,10 @@
 					</td>
 					<td>{{ formater(item.creation_date) }}</td>
 					<td>{{ item.author }}</td>
-					<td>
+					<td v-if="privilege === 'all'">
+						<font-awesome-icon icon="edit" @click="setCookie(item.id_document)" />
+					</td>
+					<td v-if="privilege === 'update'">
 						<font-awesome-icon icon="edit" @click="setCookie(item.id_document)" />
 					</td>
 					<td>
@@ -54,7 +57,7 @@
 							Consulter
 						</a>
 					</td>
-					<td style="display: flex; flex-direction: column;">
+					<td style="display: flex; flex-direction: column;" v-if="privilege === 'all'">
 						<a @click="supprimer(item.id_document, item.delete_rule)" class="btn btn-outline-danger">
 							Supprimer
 						</a>
@@ -190,6 +193,7 @@ export default {
 			searchCriteria: "",
 			searchQuery: "",
 			isSearchButtonClicked: false,
+			privilege: String
 		};
 	},
 	created() {
@@ -198,6 +202,8 @@ export default {
 		});
 	},
 	mounted() {
+		this.privilege = this.$cookies.get("privileges");
+		console.log(this.privilege)
 		this.moduleDa = [];
 		axios.get("http://localhost:30001/documents").then((response) => {
 			console.log(response.data);

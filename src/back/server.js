@@ -210,6 +210,31 @@ app.get("/users", async function (req, res) {
 	}
 });
 
+// GET ALL ACTIONS
+app.get("/action", async function (req, res) {
+	const pool = mariadb.createPool(connectionOptions);
+
+	let connection;
+	try {
+		pool.getConnection((err, conn) => {
+			if (err) {
+				console.log("not connected due to error: " + err);
+			} else {
+				console.log("connected ! connection id is " + conn.threadId);
+				conn.end(); //release to pool
+			}
+			conn.query("SELECT * FROM ACTION", (err, resultat) => {
+				if (err) throw err;
+				res.status(200).json(resultat);
+			});
+		});
+	} catch (err) {
+		throw err;
+	} finally {
+		if (connection) return connection.release();
+	}
+});
+
 app.get("/pdf", function (request, response) {
 	fs.readFile(testFolder + request.query.filename, function (err, data) {
 		console.log(testFolder + request.query.filename);

@@ -13,7 +13,9 @@
         />
         <label style="color: white">Mot de passe</label>
         <input type="password" v-model="passwordProf" class="form-control" />
-        <button type="button" class="btn btn-primary" @click="submit()">Connexion</button>
+        <button type="button" class="btn btn-primary" @click="submit()">
+          Connexion
+        </button>
       </form>
     </div>
   </div>
@@ -275,9 +277,32 @@ export default {
           response.data.forEach((user) => {
             if (
               this.usernameProf === user.login &&
-              this.passwordProf === user.password
+              this.passwordProf === user.password &&
+              user.is_active === 1
             ) {
-				this.$router.push("/folder");
+              console.log("first condition")
+              axios.get("http://localhost:30001/action").then((action) => {
+
+                action.data.forEach((act) => {
+                  if (user.id_action === act.id_action) {
+                    console.log("second condition")
+                    if (act.can_update === 1 && act.can_delete === 1) {
+                      console.log("all")
+                      this.$cookies.set("privileges", "all");
+                    }
+                    if (act.can_update === 1 && act.can_delete === 0) {
+                      console.log("update")
+                      this.$cookies.set("privileges", "update");
+                    }
+                    if (act.can_update === 0 && act.can_delete === 0) {
+                      console.log("read")
+                      this.$cookies.set("privileges", "read");
+                    }
+                  }
+                });
+              });
+
+              this.$router.push("/folder");
             }
           });
         });
