@@ -381,6 +381,24 @@ app.get("/home", async function (req, res) {
 	}
 });
 
+app.get('/pdf', function(request, response){
+	fs.readFile(testFolder+'Cours_SMIL_2010.pdf', function (err,data){
+		console.log(testFolder+'Cours_SMIL_2010.pdf')
+		response.contentType("application/pdf");
+		response.send(data);
+	});
+});
+
+/*
+app.get("/pdf", function (request, response) {
+	fs.readFile(testFolder + request.query.filename, function (err, data) {
+		console.log(testFolder + request.query.filename);
+		response.contentType("application/pdf");
+		response.send(data);
+	});
+});
+*/
+
 app.listen(port, function () {
 	console.log("Sample mariaDB app listening on port " + port);
 });
