@@ -184,7 +184,6 @@ export default {
 			searchCriterias: [
 				{ value: "author", name: "Auteur" },
 				{ value: "filename", name: "Nom du fichier" },
-				{ value: "creation_date", name: "Date de création" },
 				{ value: "category", name: "Catégorie" },
 				{ value: "keywords", name: "Mots clés" },
 			],
@@ -273,7 +272,7 @@ export default {
 		supprimer(id_doc, rule) {
 			if (rule === 1) {
 				axios
-					.delete("http://localhost:30001/document/" + id_doc)
+					.delete("http://localhost:30001/deleteDocument/" + id_doc)
 					.then((response) => {
 						console.log(response);
 						window.location.reload();
@@ -299,16 +298,14 @@ export default {
 		searchDocument() {
 			this.isSearchButtonClicked = true;
 			if (this.searchQuery !== "" && this.isSearchButtonClicked) {
-				this.searchQuery.toLowerCase();
+				this.searchQuery = this.searchQuery.toLowerCase();
+			
 				switch (this.searchCriteria) {
 					case "author":
 						this.searchByAuthor(this.searchQuery);
 						break;
 					case "filename":
 						this.searchByFilename(this.searchQuery);
-						break;
-					case "creation_date":
-						this.searchByDate(this.searchQuery);
 						break;
 					case "category":
 						this.searchByCategory(this.searchQuery);
@@ -329,7 +326,7 @@ export default {
 				.post("http://localhost:9200/ged-document/_search/", {
 					query: {
 						wildcard: {
-							author: `*${searchQuery}*`,
+							author: `*${searchQuery.toLowerCase()}*`,
 						},
 					},
 				})
@@ -353,31 +350,7 @@ export default {
 				.post("http://localhost:9200/ged-document/_search/", {
 					query: {
 						wildcard: {
-							filename: `*${searchQuery}*`,
-						},
-					},
-				})
-				.then((result) => {
-					result.data.hits.hits.forEach((entry) => {
-						this.searchResult.push(entry._source);
-						//this.isSearchButtonClicked = false;
-					});
-				})
-				.catch((error) => {
-					console.error(`Echec AXIOS : ${error}`);
-				});
-
-			if (this.searchResult.length === 0) {
-				this.isSearchButtonClicked = false;
-			}
-			this.searchResult = [];
-		},
-		searchByDate(searchQuery) {
-			axios
-				.post("http://localhost:9200/ged-document/_search/", {
-					query: {
-						wildcard: {
-							creation_date: `*${searchQuery}*`,
+							filename: `*${searchQuery.toLowerCase()}*`,
 						},
 					},
 				})
@@ -401,7 +374,7 @@ export default {
 				.post("http://localhost:9200/ged-document/_search/", {
 					query: {
 						wildcard: {
-							id_category: `*${searchQuery}*`,
+							id_category: `*${searchQuery.toLowerCase()}*`,
 						},
 					},
 				})
@@ -424,7 +397,7 @@ export default {
 				.post("http://localhost:9200/ged-document/_search/", {
 					query: {
 						wildcard: {
-							keywords: `*${searchQuery}*`,
+							keywords: `*${searchQuery.toLowerCase()}*`,
 						},
 					},
 				})

@@ -6,19 +6,19 @@
 				<div v-for="info in documentData" :key="info">
 					<div class="form-group">
 						<label>Nom de fichier</label>
-						<input type="text" class="form-control" aria-describedby="emailHelp" id="filename" :value="[[info.filename]]" />
+						<input type="text" class="form-control" aria-describedby="emailHelp" id="filename" :value="[[info.filename]]" disabled />
 					</div>
 					<div class="form-group">
 						<label>Titre</label>
-						<input type="text" class="form-control" aria-describedby="emailHelp" :value="[[info.title]]" id="title" />
+						<input type="text" class="form-control" aria-describedby="emailHelp" :value="[[info.title]]" id="title"  />
 					</div>
 					<div class="form-group">
 						<label>Date de creation</label>
-						<input type="text" class="form-control" aria-describedby="emailHelp" :value="[[info.creation_date]]" id="dateC" />
+						<input type="text" class="form-control" aria-describedby="emailHelp" :value="[[info.creation_date]]" id="dateC" disabled />
 					</div>
 					<div class="form-group">
 						<label>Date de modification</label>
-						<input type="text" class="form-control" aria-describedby="emailHelp" :value="[[info.modification_date]]" id="dateM" />
+						<input type="text" class="form-control" aria-describedby="emailHelp" :value="[[info.modification_date]]" id="dateM" disabled/>
 					</div>
 					<div class="form-group">
 						<label>Auteur</label>
@@ -75,7 +75,7 @@
 						</select>
 					</div>
 					<div class="form-group">
-						<input type="submit" @click="update()" value="Modifier" />
+						<input type="button" @click="update()" value="Modifier"  />
 					</div>
 				</div>
 			</form>
@@ -204,8 +204,11 @@ export default {
 				})
 				.then(function(response) {
 					console.log(response);
+					
 					this.sendForm = true;
+					
 				});
+				this.$router.push("/folder");
 		},
 		getVal() {
 			if (document.getElementById("supprimer").checked) {

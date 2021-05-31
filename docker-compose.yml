@@ -10,8 +10,6 @@ services:
       - backend
     environment:
       - MARIADB_HOST=ged-mariadb-app
-      - MARIADB_USER=UserGed
-      - MARIADB_PASS=GEDGROUPE4
       - MARIADB_DB=GED
     volumes:
       - ./GED_PDF:/var/www/html # A REVERIFIER MAIS ON N'EN AURA PEUT-ETRE PAS BESOIN A LA FIN
@@ -25,13 +23,12 @@ services:
       - "30002:3306"
     volumes:
       - db_data:/var/lib/mariadb
+      - ./src/back/database:/etc/mysql/conf.d
       - ./src/back/database/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - backend
     environment:
       - MARIADB_ROOT_PASSWORD=root
-      - MARIADB_USER=UserGed
-      - MARIADB_PASSWORD=GEDGROUPE4
       - MARIADB_DATABASE=GED
     container_name: ged-mariadb-app
   # 3 - PHPMYADMIN CONTAINER

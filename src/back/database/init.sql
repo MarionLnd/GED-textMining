@@ -65,6 +65,14 @@ CREATE TABLE CONCERN (
 	FOREIGN KEY (id_category) REFERENCES CATEGORY (id_category)
 );
 
+CREATE EVENT Supprimer
+    ON SCHEDULE
+      EVERY 1 WEEK
+    COMMENT 'Supprimer les documents'
+    DO
+      DELETE FROM DOCUMENT WHERE id_document = (SELECT id_document FROM DOCUMENT INNER JOIN RULE ON RULE.id_rule=DOCUMENT.id_rule WHERE DATE_ADD(DOCUMENT.creation_date, INTERVAL (delete_time+archive_time) MONTH) = "2021-05-30 00:00:00");
+
+
 INSERT INTO ACTION(can_delete, can_update) VALUE (0, 0);
 INSERT INTO ACTION(can_delete, can_update) VALUE (0, 1);
 INSERT INTO ACTION(can_delete, can_update) VALUE (1, 1);

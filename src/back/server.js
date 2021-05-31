@@ -15,8 +15,8 @@ const app = express();
 const port = process.env.PORT || 8080;
 const mariadbHost = process.env.MARIADB_HOST || "localhost";
 const mariadbPort = process.env.MARIADB_PORT || "3306";
-const mariadbUser = process.env.MARIADB_USER || "UserGed";
-const mariadbPass = process.env.MARIADB_PASS || "GEDGROUPE4";
+const mariadbUser = process.env.MARIADB_USER || "root";
+const mariadbPass = process.env.MARIADB_PASS || "root";
 const mariadbDB = process.env.MARIADB_DB || "GED";
 
 const connectionOptions = {
@@ -126,6 +126,40 @@ app.put("/documentUpdate/:id_document", async (req, res) => {
 	}
 });
 
+// DELETE DOCUMENT BY ID
+app.delete("/deleteDocument/:id_document", async function (req, res) {
+	const pool = mariadb.createPool(connectionOptions);
+
+	let connection;
+	try {
+		pool.getConnection((err, conn) => {
+			if (err) {
+				console.log("not connected due to error: " + err);
+			} else {
+				console.log("connected ! connection id is " + conn.threadId);
+				conn.end(); //release to pool
+			}
+			let sql = "delete from DOCUMENT where id_document=?"
+				let data = [req.params.id_document];
+	
+				conn.query(sql, data, (err, results) => {
+	
+					if (err) throw err;
+					console.log('Rows affected:', results.affectedRows);
+					res.status(200).json({ Result: "200 - table deleted" })
+	
+				});
+
+		});
+
+
+	} catch (err) {
+		throw err;
+	} finally {
+		if (connection) return connection.release();
+	}
+		
+});
 // GET ALL RULES
 app.get("/rules", async function (req, res) {
 	const pool = mariadb.createPool(connectionOptions);
@@ -140,6 +174,31 @@ app.get("/rules", async function (req, res) {
 				conn.end(); //release to pool
 			}
 			conn.query("SELECT * FROM RULE", (err, resultat) => {
+				if (err) throw err;
+				res.status(200).json(resultat);
+			});
+		});
+	} catch (err) {
+		throw err;
+	} finally {
+		if (connection) return connection.release();
+	}
+});
+
+// GET ALL USERS
+app.get("/users", async function (req, res) {
+	const pool = mariadb.createPool(connectionOptions);
+
+	let connection;
+	try {
+		pool.getConnection((err, conn) => {
+			if (err) {
+				console.log("not connected due to error: " + err);
+			} else {
+				console.log("connected ! connection id is " + conn.threadId);
+				conn.end(); //release to pool
+			}
+			conn.query("SELECT * FROM USER", (err, resultat) => {
 				if (err) throw err;
 				res.status(200).json(resultat);
 			});
