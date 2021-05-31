@@ -5,10 +5,13 @@
 		<table class="table table-bordered table-striped">
 			<thead>
 				<tr>
-					<th>Titre</th>
+					<th>Nom du fichier</th>
 					<th>Date</th>
 					<th>Auteur</th>
-					<th colspan="2">
+					<th colspan="3">Actions</th>
+				</tr>
+				<tr>
+					<th colspan="6">
 						<div class="input-group">
 							<select v-model="searchCriteria">
 								<option disabled value="">Critère</option>
@@ -23,6 +26,8 @@
 								aria-label="Search"
 								aria-describedby="search-addon"
 								v-model.trim="searchQuery"
+								@keyup.enter="searchDocument"
+								@change="resetSearchResult"
 							/>
 							<button type="button" class="btn btn-outline-success" @click.prevent="searchDocument"><font-awesome-icon icon="search" /></button>
 						</div>
@@ -30,11 +35,10 @@
 							<font-awesome-icon icon="info-circle" class="mr-2" />
 							<small>Veuillez entrer les différents mots clés séparés d'une virgule</small>
 						</div>
-						<!--button type="button" class="btn btn-secondary btn-lg">Elastic Search</button-->
 					</th>
 				</tr>
 			</thead>
-			<tbody>
+			<tbody v-if="searchQuery === ''">
 				<tr v-for="item in moduleDa" :key="item.id_document">
 					<td>
 						{{ item.filename }}
@@ -44,7 +48,57 @@
 					<td>
 						<font-awesome-icon icon="edit" @click="setCookie(item.id_document)" />
 					</td>
-					<td @click="supprimer(item.id_document, item.delete_rule)">delete</td>
+					<td>
+						<a :href="'http://localhost:30001/pdf?filename=' + item.filename" target="_blank">
+							<font-awesome-icon icon="external-link-alt" />
+							Consulter
+						</a>
+					</td>
+					<td style="display: flex; flex-direction: column;">
+						<a @click="supprimer(item.id_document, item.delete_rule)" class="btn btn-outline-danger">
+							Supprimer
+						</a>
+						<small class="text-danger">
+							<font-awesome-icon icon="exclamation-triangle" @click="setCookie(item.id_document)" />
+							Cette action est irréversible
+						</small>
+					</td>
+				</tr>
+			</tbody>
+			<tbody v-else>
+				<tr v-if="!isSearchButtonClicked && searchResult.length === 0">
+					<td colspan="6">Loading..</td>
+				</tr>
+				<tr v-if="isSearchButtonClicked && searchCriteria === ''">
+					<td colspan="6" class="bg-danger">Vous devez sélectionner un critère de recherche</td>
+				</tr>
+				<tr v-if="isSearchButtonClicked && searchResult.length === 0">
+					<td colspan="6" class="bg-danger">Votre recherche ne correspond à aucun document présent sur l'entrepôt.</td>
+				</tr>
+				<tr v-for="item in searchResult" :key="item.id_document">
+					<td>
+						{{ item.filename }}
+					</td>
+					<td>{{ formater(item.creation_date) }}</td>
+					<td>{{ item.author }}</td>
+					<td>
+						<font-awesome-icon icon="edit" @click="setCookie(item.id_document)" />
+					</td>
+					<td>
+						<a :href="'http://localhost:30001/pdf?filename=' + item.filename" target="_blank">
+							<font-awesome-icon icon="external-link-alt" />
+							Consulter
+						</a>
+					</td>
+					<td style="display: flex; flex-direction: column;">
+						<a @click="supprimer(item.id_document, item.delete_rule)" class="btn btn-outline-danger">
+							Supprimer
+						</a>
+						<small class="text-danger">
+							<font-awesome-icon icon="exclamation-triangle" @click="setCookie(item.id_document)" />
+							Cette action est irréversible
+						</small>
+					</td>
 				</tr>
 			</tbody>
 		</table>
@@ -84,6 +138,11 @@ th {
 tbody td {
 	position: relative;
 	cursor: pointer;
+	vertical-align: baseline;
+}
+
+tr {
+	border: 1px solid #dee2e6;
 }
 
 a {
@@ -120,62 +179,87 @@ export default {
 	data() {
 		return {
 			moduleDa: [],
+			searchResult: [],
+			rules: [],
 			searchCriterias: [
 				{ value: "author", name: "Auteur" },
-				{ value: "title", name: "Titre" },
+				{ value: "filename", name: "Nom du fichier" },
 				{ value: "creation_date", name: "Date de création" },
+				{ value: "category", name: "Catégorie" },
 				{ value: "keywords", name: "Mots clés" },
 			],
 			searchCriteria: "",
 			searchQuery: "",
+			isSearchButtonClicked: false,
 		};
 	},
-
+	created() {
+		axios.get("http://localhost:30001/rules").then((response) => {
+			response.data.forEach((rule) => this.rules.push(rule));
+		});
+	},
 	mounted() {
 		this.moduleDa = [];
 		axios.get("http://localhost:30001/documents").then((response) => {
-			console.log(response);
-
+			console.log(response.data);
 			response.data.forEach((doc) => {
-				console.log(response.data);
+				let deleteDate, archiveDate, dateA;
 
-				axios.get("http://localhost:30001/rules").then((rule) => {
-					rule.data.forEach((element) => {
-						if (doc.id_rule === element.id_rule) {
-							var deleteDate = new Date(this.formater(doc.creation_date));
-							deleteDate.setMonth(deleteDate.getMonth() + element.delete_time);
-							var archiveDate = new Date(this.formater(doc.creation_date));
-							// console.log(moment(test).format("YYYY-MM-DD"))
-							archiveDate.setMonth(archiveDate.getMonth() + element.archive_time);
-							var dateA = new Date();
-							console.log(
-								moment(dateA)
-									.format("YYYY-MM-DD")
-									.toString()
-							);
-							//  console.log(moment(test).format("YYYY-MM-DD"))
-
-							//  console.log(moment(test).format("YYYY-MM-DD") > moment(dateA).format("YYYY-MM-DD"))
-							if (
-								moment(archiveDate).format("YYYY-MM-DD") > moment(dateA).format("YYYY-MM-DD") === true ||
-								moment(deleteDate).format("YYYY-MM-DD") > moment(dateA).format("YYYY-MM-DD") === true
-							) {
-								this.moduleDa.push({
-									id_document: doc.id_document,
-									filename: doc.filename,
-									title: doc.title,
-									creation_date: doc.creation_date,
-									modification_date: doc.modification_date,
-									author: doc.author,
-									delete_rule: element.delete_rule,
-									delete_time: deleteDate,
-								});
-							}
-							console.log(this.moduleDa);
-						}
-						//this.data = response.data.data;
-					});
+				let rule = this.rules.filter((rule) => rule.id_rule === doc.id_rule)[0];
+				if (this.rules.filter((rule) => rule.id_rule === doc.id_rule).length === 1) {
+					deleteDate = new Date(this.formater(doc.creation_date));
+					deleteDate.setMonth(deleteDate.getMonth() + rule.delete_time);
+					archiveDate = new Date(this.formater(doc.creation_date));
+					// console.log(moment(test).format("YYYY-MM-DD"))
+					archiveDate.setMonth(archiveDate.getMonth() + rule.archive_time);
+					dateA = new Date();
+				}
+				this.moduleDa.push({
+					id_document: doc.id_document,
+					filename: doc.filename,
+					title: doc.title,
+					creation_date: doc.creation_date,
+					modification_date: doc.modification_date,
+					author: doc.author,
+					delete_rule: rule.delete_rule,
+					delete_time:
+						moment(archiveDate).format("YYYY-MM-DD") > moment(dateA).format("YYYY-MM-DD") === true ||
+						moment(deleteDate).format("YYYY-MM-DD") > moment(dateA).format("YYYY-MM-DD") === true
+							? deleteDate
+							: "",
 				});
+
+				/*this.rules.forEach((element) => {
+					if (doc.id_rule === element.id_rule) {
+						var deleteDate = new Date(this.formater(doc.creation_date));
+						deleteDate.setMonth(deleteDate.getMonth() + element.delete_time);
+						var archiveDate = new Date(this.formater(doc.creation_date));
+						// console.log(moment(test).format("YYYY-MM-DD"))
+						archiveDate.setMonth(archiveDate.getMonth() + element.archive_time);
+						var dateA = new Date();
+						console.log(
+							moment(dateA)
+								.format("YYYY-MM-DD")
+								.toString()
+						);
+						if (
+							moment(archiveDate).format("YYYY-MM-DD") > moment(dateA).format("YYYY-MM-DD") === true ||
+							moment(deleteDate).format("YYYY-MM-DD") > moment(dateA).format("YYYY-MM-DD") === true
+						) {
+							this.moduleDa.push({
+								id_document: doc.id_document,
+								filename: doc.filename,
+								title: doc.title,
+								creation_date: doc.creation_date,
+								modification_date: doc.modification_date,
+								author: doc.author,
+								delete_rule: element.delete_rule,
+								delete_time: deleteDate,
+							});
+						}
+						console.log(this.moduleDa);
+					}
+				});*/
 			});
 		});
 	},
@@ -195,6 +279,17 @@ export default {
 						window.location.reload();
 					})
 					.catch((error) => console.log(error));
+
+				axios
+					.post("http://localhost:9200/ged-document/_delete_by_query", {
+						query: {
+							match: {
+								id_document: id_doc,
+							},
+						},
+					})
+					.then((response) => console.log(response))
+					.catch((err) => console.error(err));
 			}
 		},
 		formater(date) {
@@ -202,102 +297,158 @@ export default {
 			//console.log(date.substring(0, 10).getMonth())
 		},
 		searchDocument() {
-			let previousDocumentsList = this.moduleDa;
-			console.log(previousDocumentsList);
-
-			if (this.searchQuery !== "") {
+			this.isSearchButtonClicked = true;
+			if (this.searchQuery !== "" && this.isSearchButtonClicked) {
+				this.searchQuery.toLowerCase();
 				switch (this.searchCriteria) {
 					case "author":
 						this.searchByAuthor(this.searchQuery);
 						break;
-					case "title":
-						this.searchByTitle(this.searchQuery);
+					case "filename":
+						this.searchByFilename(this.searchQuery);
 						break;
 					case "creation_date":
 						this.searchByDate(this.searchQuery);
+						break;
+					case "category":
+						this.searchByCategory(this.searchQuery);
 						break;
 					case "keywords":
 						this.searchByKeywords(this.searchQuery);
 						break;
 					default:
 						console.log("Pas de recherche");
-						this.moduleDa = previousDocumentsList;
+						this.searchResult = [];
 				}
 			} else {
-				console.log(previousDocumentsList);
-				this.moduleDa = previousDocumentsList;
+				this.searchResult = [];
 			}
 		},
 		searchByAuthor(searchQuery) {
-			this.moduleDa = [];
 			axios
 				.post("http://localhost:9200/ged-document/_search/", {
 					query: {
-						match: {
-							author: searchQuery,
+						wildcard: {
+							author: `*${searchQuery}*`,
 						},
 					},
 				})
 				.then((result) => {
-					console.log(result.data);
-					console.log(result.data.hits.hits);
 					result.data.hits.hits.forEach((entry) => {
-						console.log(entry);
-						this.moduleDa.push(entry._source);
+						this.searchResult.push(entry._source);
+						//this.isSearchButtonClicked = false;
 					});
-					//this.moduleDa = result.data.hits.hits._source;
 				})
 				.catch((error) => {
 					console.error(`Echec AXIOS : ${error}`);
 				});
+
+			if (this.searchResult.length === 0) {
+				this.isSearchButtonClicked = false;
+			}
+			this.searchResult = [];
 		},
-		searchByTitle(searchQuery) {
+		searchByFilename(searchQuery) {
 			axios
 				.post("http://localhost:9200/ged-document/_search/", {
 					query: {
-						match: {
-							title: searchQuery,
+						wildcard: {
+							filename: `*${searchQuery}*`,
 						},
 					},
 				})
 				.then((result) => {
-					console.log(result.data);
+					result.data.hits.hits.forEach((entry) => {
+						this.searchResult.push(entry._source);
+						//this.isSearchButtonClicked = false;
+					});
 				})
 				.catch((error) => {
 					console.error(`Echec AXIOS : ${error}`);
 				});
+
+			if (this.searchResult.length === 0) {
+				this.isSearchButtonClicked = false;
+			}
+			this.searchResult = [];
 		},
 		searchByDate(searchQuery) {
 			axios
 				.post("http://localhost:9200/ged-document/_search/", {
 					query: {
-						match: {
-							creation_date: searchQuery,
+						wildcard: {
+							creation_date: `*${searchQuery}*`,
 						},
 					},
 				})
 				.then((result) => {
-					console.log(result.data);
+					result.data.hits.hits.forEach((entry) => {
+						this.searchResult.push(entry._source);
+						//this.isSearchButtonClicked = false;
+					});
 				})
 				.catch((error) => {
 					console.error(`Echec AXIOS : ${error}`);
 				});
+
+			if (this.searchResult.length === 0) {
+				this.isSearchButtonClicked = false;
+			}
+			this.searchResult = [];
+		},
+		searchByCategory(searchQuery) {
+			axios
+				.post("http://localhost:9200/ged-document/_search/", {
+					query: {
+						wildcard: {
+							id_category: `*${searchQuery}*`,
+						},
+					},
+				})
+				.then((result) => {
+					result.data.hits.hits.forEach((entry) => {
+						this.searchResult.push(entry._source);
+						//this.isSearchButtonClicked = false;
+					});
+				})
+				.catch((error) => {
+					console.error(`Echec AXIOS : ${error}`);
+				});
+			if (this.searchResult.length === 0) {
+				this.isSearchButtonClicked = false;
+			}
+			this.searchResult = [];
 		},
 		searchByKeywords(searchQuery) {
 			axios
 				.post("http://localhost:9200/ged-document/_search/", {
 					query: {
-						match: {
-							keywords: searchQuery,
+						wildcard: {
+							keywords: `*${searchQuery}*`,
 						},
 					},
 				})
 				.then((result) => {
-					console.log(result.data);
+					result.data.hits.hits.forEach((entry) => {
+						this.searchResult.push(entry._source);
+						//this.isSearchButtonClicked = false;
+					});
 				})
 				.catch((error) => {
 					console.error(`Echec AXIOS : ${error}`);
 				});
+			if (this.searchResult.length === 0) {
+				this.isSearchButtonClicked = false;
+			}
+			this.searchResult = [];
+			//this.isSearchButtonClicked = false;
+			//this.searchResult = [];
+		},
+		resetSearchResult() {
+			if (this.searchQuery === "") {
+				this.searchResult = [];
+				this.isSearchButtonClicked = false;
+			}
 		},
 	},
 };

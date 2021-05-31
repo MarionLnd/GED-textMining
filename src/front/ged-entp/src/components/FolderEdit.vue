@@ -1,22 +1,23 @@
 <template>
 	<div class="container">
+		<h2>Modifier/Ajouter les métadonnées</h2>
 		<div class="card">
 			<form>
 				<div v-for="info in documentData" :key="info">
 					<div class="form-group">
-						<label>File Name</label>
+						<label>Nom de fichier</label>
 						<input type="text" class="form-control" aria-describedby="emailHelp" id="filename" :value="[[info.filename]]" />
 					</div>
 					<div class="form-group">
-						<label>Title</label>
+						<label>Titre</label>
 						<input type="text" class="form-control" aria-describedby="emailHelp" :value="[[info.title]]" id="title" />
 					</div>
 					<div class="form-group">
-						<label>date creation</label>
+						<label>Date de creation</label>
 						<input type="text" class="form-control" aria-describedby="emailHelp" :value="[[info.creation_date]]" id="dateC" />
 					</div>
 					<div class="form-group">
-						<label>date modification</label>
+						<label>Date de modification</label>
 						<input type="text" class="form-control" aria-describedby="emailHelp" :value="[[info.modification_date]]" id="dateM" />
 					</div>
 					<div class="form-group">
@@ -25,8 +26,14 @@
 					</div>
 
 					<div class="form-group">
-						<label>keyword</label>
-						<input type="text" class="form-control" aria-describedby="emailHelp" placeholder="Enter filename" id="keyword" />
+						<label>Mots clés</label>
+						<input
+							type="text"
+							class="form-control"
+							aria-describedby="emailHelp"
+							placeholder="Entrez les mots clés séparés d'une virgule (mot1, mot2, etc.)"
+							id="keyword"
+						/>
 					</div>
 					<div class="form-group">
 						<div style="width: 300px">
@@ -189,11 +196,13 @@ export default {
 					filename: document.getElementById("filename").value,
 					title: document.getElementById("title").value,
 					creation_date: document.getElementById("dateC").value,
-					modification_date: moment(date).format("YYYY-MM-DD").toString(),
+					modification_date: moment(date)
+						.format("YYYY-MM-DD")
+						.toString(),
 					author: document.getElementById("auteur").value,
 					id_rule: document.getElementById("rule").value,
 				})
-				.then(function (response) {
+				.then(function(response) {
 					console.log(response);
 					this.sendForm = true;
 				});

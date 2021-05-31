@@ -7,7 +7,7 @@ import VueCookies from "vue-cookies";
 
 import Routes from "./Routes";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faEdit, faTrashAlt, faInfoCircle, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faEdit, faTrashAlt, faInfoCircle, faSearch, faExternalLinkAlt, faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 Vue.config.productionTip = false;
@@ -19,6 +19,8 @@ library.add(faTrashAlt);
 library.add(faEdit);
 library.add(faInfoCircle);
 library.add(faSearch);
+library.add(faExternalLinkAlt);
+library.add(faExclamationTriangle);
 
 const router = new VueRouter({
 	routes: Routes,
