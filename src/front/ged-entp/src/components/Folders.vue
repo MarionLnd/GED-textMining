@@ -1,26 +1,41 @@
 <template>
 	<div class="table-responsive">
-		<!-- navbar with links to others pages-->
-
 		<h2>Liste des PDFs</h2>
 
 		<table class="table table-bordered table-striped">
 			<thead>
 				<tr>
-					<th>titre</th>
-					<th>date</th>
-					<th>auteur</th>
+					<th>Titre</th>
+					<th>Date</th>
+					<th>Auteur</th>
 					<th colspan="2">
 						<div class="input-group">
-							<input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
-							<button type="button" class="btn btn-outline-secondary">search</button>
+							<select v-model="searchCriteria">
+								<option disabled value="">Critère</option>
+								<option v-for="(criteria, key) of searchCriterias" :key="key" :value="criteria.value">
+									{{ criteria.name }}
+								</option>
+							</select>
+							<input
+								type="search"
+								class="form-control rounded"
+								placeholder="Rechercher un document"
+								aria-label="Search"
+								aria-describedby="search-addon"
+								v-model.trim="searchQuery"
+							/>
+							<button type="button" class="btn btn-outline-success" @click.prevent="searchDocument"><font-awesome-icon icon="search" /></button>
+						</div>
+						<div class="info-tip" v-if="searchCriteria === 'keywords'">
+							<font-awesome-icon icon="info-circle" class="mr-2" />
+							<small>Veuillez entrer les différents mots clés séparés d'une virgule</small>
 						</div>
 						<!--button type="button" class="btn btn-secondary btn-lg">Elastic Search</button-->
 					</th>
 				</tr>
 			</thead>
 			<tbody>
-				<tr v-for="item in moduleDa" :key="item">
+				<tr v-for="item in moduleDa" :key="item.id_document">
 					<td>
 						{{ item.filename }}
 					</td>
@@ -51,12 +66,11 @@ table {
 	margin-left: 5%;
 	border-collapse: collapse;
 	overflow: hidden;
-
 	margin-top: 30px;
 }
 
-th,
-td {
+td,
+th {
 	padding: 15px;
 }
 
@@ -71,6 +85,7 @@ tbody td {
 	position: relative;
 	cursor: pointer;
 }
+
 a {
 	text-decoration: none;
 	color: white;
@@ -78,69 +93,21 @@ a {
 tbody tr:hover {
 	background-color: rgba(255, 255, 255, 0);
 }
-@media only screen and (max-width: 760px), (min-device-width: 768px) and (max-device-width: 1024px) {
-	/* Force table to not be like tables anymore */
-	table,
-	thead,
-	tbody,
-	th,
-	td,
-	tr {
-		display: block;
-	}
 
-	/* Hide table headers (but not display: none;, for accessibility) */
-	thead tr {
-		position: absolute;
-		top: -9999px;
-		left: -9999px;
-	}
+select {
+	font-size: 0.9rem;
+	text-align: center;
+	border-radius: 0.2rem;
+}
 
-	tr {
-		border: 2px solid #eee;
-	}
-
-	td {
-		/* Behave  like a "row" */
-		border: none;
-		border-bottom: 1px solid #eee;
-		position: relative;
-		padding-left: 50%;
-	}
-
-	td:before {
-		/* Now like a table header */
-		position: absolute;
-		/* Top/left values mimic padding */
-		top: 6px;
-		left: 6px;
-		width: 45%;
-		padding-right: 100%;
-		white-space: nowrap;
-	}
-
-	/*
-		Label the data
-		*/
-
-	td:nth-of-type(1):before {
-		content: "Nom";
-	}
-	td:nth-of-type(2):before {
-		content: "Prenom";
-	}
-	td:nth-of-type(3):before {
-		content: "origine";
-	}
-	td:nth-of-type(4):before {
-		content: "statut";
-	}
-	td:nth-of-type(5):before {
-		content: "service statutaire";
-	}
-	td:nth-of-type(6):before {
-		content: "service effectué";
-	}
+.info-tip {
+	display: flex;
+	justify-content: center;
+	align-content: center;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 0.4rem;
+	padding: 0.3rem;
 }
 </style>
 
@@ -153,6 +120,14 @@ export default {
 	data() {
 		return {
 			moduleDa: [],
+			searchCriterias: [
+				{ value: "author", name: "Auteur" },
+				{ value: "title", name: "Titre" },
+				{ value: "creation_date", name: "Date de création" },
+				{ value: "keywords", name: "Mots clés" },
+			],
+			searchCriteria: "",
+			searchQuery: "",
 		};
 	},
 
@@ -173,7 +148,11 @@ export default {
 							// console.log(moment(test).format("YYYY-MM-DD"))
 							archiveDate.setMonth(archiveDate.getMonth() + element.archive_time);
 							var dateA = new Date();
-							console.log(moment(dateA).format("YYYY-MM-DD").toString());
+							console.log(
+								moment(dateA)
+									.format("YYYY-MM-DD")
+									.toString()
+							);
 							//  console.log(moment(test).format("YYYY-MM-DD"))
 
 							//  console.log(moment(test).format("YYYY-MM-DD") > moment(dateA).format("YYYY-MM-DD"))
@@ -181,8 +160,6 @@ export default {
 								moment(archiveDate).format("YYYY-MM-DD") > moment(dateA).format("YYYY-MM-DD") === true ||
 								moment(deleteDate).format("YYYY-MM-DD") > moment(dateA).format("YYYY-MM-DD") === true
 							) {
-								console.log("yes");
-
 								this.moduleDa.push({
 									id_document: doc.id_document,
 									filename: doc.filename,
@@ -194,7 +171,6 @@ export default {
 									delete_time: deleteDate,
 								});
 							}
-
 							console.log(this.moduleDa);
 						}
 						//this.data = response.data.data;
@@ -224,6 +200,104 @@ export default {
 		formater(date) {
 			return date.substring(0, 10);
 			//console.log(date.substring(0, 10).getMonth())
+		},
+		searchDocument() {
+			let previousDocumentsList = this.moduleDa;
+			console.log(previousDocumentsList);
+
+			if (this.searchQuery !== "") {
+				switch (this.searchCriteria) {
+					case "author":
+						this.searchByAuthor(this.searchQuery);
+						break;
+					case "title":
+						this.searchByTitle(this.searchQuery);
+						break;
+					case "creation_date":
+						this.searchByDate(this.searchQuery);
+						break;
+					case "keywords":
+						this.searchByKeywords(this.searchQuery);
+						break;
+					default:
+						console.log("Pas de recherche");
+						this.moduleDa = previousDocumentsList;
+				}
+			} else {
+				console.log(previousDocumentsList);
+				this.moduleDa = previousDocumentsList;
+			}
+		},
+		searchByAuthor(searchQuery) {
+			this.moduleDa = [];
+			axios
+				.post("http://localhost:9200/ged-document/_search/", {
+					query: {
+						match: {
+							author: searchQuery,
+						},
+					},
+				})
+				.then((result) => {
+					console.log(result.data);
+					console.log(result.data.hits.hits);
+					result.data.hits.hits.forEach((entry) => {
+						console.log(entry);
+						this.moduleDa.push(entry._source);
+					});
+					//this.moduleDa = result.data.hits.hits._source;
+				})
+				.catch((error) => {
+					console.error(`Echec AXIOS : ${error}`);
+				});
+		},
+		searchByTitle(searchQuery) {
+			axios
+				.post("http://localhost:9200/ged-document/_search/", {
+					query: {
+						match: {
+							title: searchQuery,
+						},
+					},
+				})
+				.then((result) => {
+					console.log(result.data);
+				})
+				.catch((error) => {
+					console.error(`Echec AXIOS : ${error}`);
+				});
+		},
+		searchByDate(searchQuery) {
+			axios
+				.post("http://localhost:9200/ged-document/_search/", {
+					query: {
+						match: {
+							creation_date: searchQuery,
+						},
+					},
+				})
+				.then((result) => {
+					console.log(result.data);
+				})
+				.catch((error) => {
+					console.error(`Echec AXIOS : ${error}`);
+				});
+		},
+		searchByKeywords(searchQuery) {
+			axios
+				.post("http://localhost:9200/ged-document/_search/", {
+					query: {
+						match: {
+							keywords: searchQuery,
+						},
+					},
+				})
+				.then((result) => {
+					console.log(result.data);
+				})
+				.catch((error) => {
+					console.error(`Echec AXIOS : ${error}`);
+				});
 		},
 	},
 };

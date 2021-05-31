@@ -75,10 +75,10 @@ INSERT INTO USER(login, password, is_active, id_action) VALUE ('root', 'root', 1
 INSERT INTO USER(login, password, is_active, id_action) VALUE ('student', 'student', 1, 2);
 INSERT INTO USER(login, password, is_active) VALUE ('student_not_active', 'student', 0);
 
-INSERT INTO RULE VALUE (10, 5, 5, true, true, "Archiver pendant 5 mois et Supprimer apres 5 mois");
-INSERT INTO RULE VALUE (8, 4, 4, true, true, "Archiver pendant 4 mois et Supprimer apres 4 mois");
-INSERT INTO RULE VALUE (6, 3, 3, true, true, "Archiver pendant 3 mois et Supprimer apres 3 mois");
-INSERT INTO RULE VALUE (4, 2, 2, true, true, "Archiver pendant 2 mois et Supprimer apres 2 mois");
-INSERT INTO RULE VALUE (2, 1, 1, true, true, "Archiver pendant 1 mois et Supprimer apres 1 mois");
-INSERT INTO RULE VALUE (100, 3, 0, true, false, "Archiver pendant 3 mois puis Supprimer" );
+INSERT INTO RULE VALUE (10, 5, 5, true, true, "Archiver pendant 5 mois et supprimer apres 5 mois");
+INSERT INTO RULE VALUE (8, 4, 4, true, true, "Archiver pendant 4 mois et supprimer apres 4 mois");
+INSERT INTO RULE VALUE (6, 3, 3, true, true, "Archiver pendant 3 mois et supprimer apres 3 mois");
+INSERT INTO RULE VALUE (4, 2, 2, true, true, "Archiver pendant 2 mois et supprimer apres 2 mois");
+INSERT INTO RULE VALUE (2, 1, 1, true, true, "Archiver pendant 1 mois et supprimer apres 1 mois");
+INSERT INTO RULE VALUE (100, 3, 0, true, false, "Archiver pendant 3 mois puis supprimer" );
 INSERT INTO RULE VALUE (101, 0, 3, false , true, "Supprimer apres 3 mois" );

@@ -483,35 +483,6 @@ app.get("/rules", async function (req, res) {
 	}
 });
 
-app.get("/search-by-author", async (req, res) => {
-	console.log("in route search by author");
-	axios
-		.get("http://localhost:9200/ged-document/_search/", {
-			query: {
-				match: {
-					author: req.query.author,
-				},
-			},
-		})
-		.then((result) => {
-			console.log(result.data);
-			if (result.hits.total.value === 0) {
-				result.status(204).json({
-					total: 0,
-					results: [],
-				});
-			} else {
-				result.status(200).json({
-					total: result.hits.total.value,
-					results: [result.hits.hits],
-				});
-			}
-		})
-		.catch((error) => {
-			console.error(`Echec AXIOS : ${error}`);
-		});
-});
-
 app.listen(port, function () {
 	console.log("Sample mariaDB app listening on port " + port);
 });

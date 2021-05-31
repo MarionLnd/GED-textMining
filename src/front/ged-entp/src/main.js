@@ -1,37 +1,31 @@
-import Vue from 'vue'
-import App from './App.vue';
-import 'bootstrap'; 
-import 'bootstrap/dist/css/bootstrap.min.css';
-import VueRouter from "vue-router"; 
-import VueCookies from 'vue-cookies';
+import Vue from "vue";
+import App from "./App.vue";
+import "bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
+import VueRouter from "vue-router";
+import VueCookies from "vue-cookies";
 
 import Routes from "./Routes";
-import { library } from '@fortawesome/fontawesome-svg-core'
-import {
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faEdit, faTrashAlt, faInfoCircle, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
-  faEdit,
+Vue.config.productionTip = false;
+Vue.use(VueRouter);
+Vue.use(VueCookies);
 
-  faTrashAlt
-} from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-
-
-Vue.config.productionTip = false
-Vue.use(VueRouter)
-Vue.use(VueCookies)
-
-Vue.component('font-awesome-icon', FontAwesomeIcon)
-library.add(faTrashAlt)
-
-library.add(faEdit)
+Vue.component("font-awesome-icon", FontAwesomeIcon);
+library.add(faTrashAlt);
+library.add(faEdit);
+library.add(faInfoCircle);
+library.add(faSearch);
 
 const router = new VueRouter({
-  routes: Routes,
-  mode: 'history'
-})
+	routes: Routes,
+	mode: "history",
+});
 
 new Vue({
-  router: router,
-  render: h => h(App), 
-}).$mount('#app')
-
+	router: router,
+	render: (h) => h(App),
+}).$mount("#app");
