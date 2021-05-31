@@ -26,10 +26,11 @@ const connectionOptions = {
 };
 
 app.get("/nouveauDocument", async function (req, res) {
-	const pool = mariadb.createPool(connectionOptions);
-	pool.getConnection((err, conn) => {
+	try {
+		const pool = mariadb.createPool(connectionOptions);
+		pool.getConnection((err, conn) => {
 			conn
-				.query("SELECT 1 as val",(err, result) => {
+				.query("SELECT 1 as val", (err, result) => {
 					/* Récupération des chemins fichier */
 					fs.readdir(testFolder, (err, files) => {
 						if (files !== undefined) {
@@ -40,14 +41,17 @@ app.get("/nouveauDocument", async function (req, res) {
 										const fileSizeInBytes = stats.size;
 										return fileSizeInBytes;
 									}
+
 									// console.log(console.log("Taille "+ file + getFilesizeInBytes(testFolder+file)))
-									const fileSize = getFilesizeInBytes(testFolder+file)
+									const fileSize = getFilesizeInBytes(testFolder + file)
+
 									function generateChecksum(str, algorithm, encoding) {
 										return crypto
 											.createHash(algorithm || 'md5')
 											.update(str, 'utf8')
 											.digest(encoding || 'hex');
 									}
+
 									const checksum = generateChecksum(file);
 									if (data.meta.metadata !== null && data.meta.info !== null) {
 										// console.log("META + INFO")
@@ -67,19 +71,20 @@ app.get("/nouveauDocument", async function (req, res) {
 													donnees.push(null);
 												// Date Creation
 												console.log(file)
-												if((data.meta.metadata[key]["xmp:createdate"] !== undefined && data.meta.info.CreationDate === undefined) || (data.meta.metadata[key]["xmp:createdate"] !== undefined && data.meta.info.CreationDate !== undefined)){
+												if ((data.meta.metadata[key]["xmp:createdate"] !== undefined && data.meta.info.CreationDate === undefined) || (data.meta.metadata[key]["xmp:createdate"] !== undefined && data.meta.info.CreationDate !== undefined)) {
 													// console.log("date meta " + data.meta.metadata[key]["xmp:createdate"])
-													donnees.push(data.meta.metadata[key]["xmp:createdate"].substring(0, 10))}
-												else if (data.meta.metadata[key]["xmp:createdate"] === undefined && data.meta.info.CreationDate !== undefined){
+													donnees.push(data.meta.metadata[key]["xmp:createdate"].substring(0, 10))
+												} else if (data.meta.metadata[key]["xmp:createdate"] === undefined && data.meta.info.CreationDate !== undefined) {
 													// console.log("date info " +data.meta.info.CreationDate)
-													donnees.push(data.meta.info.CreationDate.substring(2,6)+'-'+data.meta.info.CreationDate.substring(6,8)+'-'+data.meta.info.CreationDate.substring(8,10))}
-												else{
-													donnees.push(null)}
+													donnees.push(data.meta.info.CreationDate.substring(2, 6) + '-' + data.meta.info.CreationDate.substring(6, 8) + '-' + data.meta.info.CreationDate.substring(8, 10))
+												} else {
+													donnees.push(null)
+												}
 												// Date modification
 												if ((data.meta.metadata[key]["xmp:modifydate"] !== undefined && data.meta.info.ModDate === undefined) || (data.meta.metadata[key]["xmp:modifydate"] !== undefined && data.meta.info.ModDate !== undefined))
 													donnees.push(data.meta.metadata[key]["xmp:modifydate"].substring(0, 10));
 												else if (data.meta.metadata[key]["xmp:modifydate"] === undefined && data.meta.info.ModDate !== undefined)
-													donnees.push(data.meta.info.ModDate.substring(2,6)+'-'+data.meta.info.ModDate.substring(6,8)+'-'+data.meta.info.ModDate.substring(8,10));
+													donnees.push(data.meta.info.ModDate.substring(2, 6) + '-' + data.meta.info.ModDate.substring(6, 8) + '-' + data.meta.info.ModDate.substring(8, 10));
 												else
 													donnees.push(null)
 												// Author
@@ -92,12 +97,12 @@ app.get("/nouveauDocument", async function (req, res) {
 												// Size
 												donnees.push(fileSize)
 												// Link
-												donnees.push(testFolder+file);
+												donnees.push(testFolder + file);
 												//Keywords
 												// data.meta.info.keywords
-												if (data.meta.info.Keywords === undefined){
+												if (data.meta.info.Keywords === undefined) {
 													donnees.push(null);
-												}else{
+												} else {
 													donnees.push(data.meta.info.Keywords)
 												}
 												// Signature
@@ -105,13 +110,13 @@ app.get("/nouveauDocument", async function (req, res) {
 												//id_rule
 												donnees.push(10);
 												//id_category
-												if(donnees[3] === null){
+												if (donnees[3] === null) {
 													conn.query("INSERT IGNORE INTO CATEGORY value (?,?)", ["Inconnu", "Date_Document_Inconnu"])
 													donnees.push("Inconnu")
+												} else {
+													conn.query("INSERT IGNORE INTO CATEGORY value (?,?)", [donnees[3].substring(0, 4), "Document_" + donnees[3].substring(0, 4)])
+													donnees.push(donnees[3].substring(0, 4))
 												}
-												else{
-													conn.query("INSERT IGNORE INTO CATEGORY value (?,?)", [donnees[3].substring(0,4), "Document_"+donnees[3].substring(0,4)])
-													donnees.push(donnees[3].substring(0,4))}
 												// Archivé
 												donnees.push(false)
 												// Supprimé
@@ -137,8 +142,7 @@ app.get("/nouveauDocument", async function (req, res) {
 												);
 											}
 										);
-									}
-									else if (data.meta.metadata !== null && data.meta.info === null) {
+									} else if (data.meta.metadata !== null && data.meta.info === null) {
 										// console.log("META sans INFO")
 										Object.entries(data.meta.metadata).forEach(
 											([key, value]) => {
@@ -178,13 +182,13 @@ app.get("/nouveauDocument", async function (req, res) {
 												// ID-Rule
 												meta.push(10);
 												// ID Sub
-												if(meta[3] === null){
+												if (meta[3] === null) {
 													conn.query("INSERT IGNORE INTO CATEGORY value (?,?)", ["Inconnu", "Date_Document_Inconnu"])
 													meta.push("Inconnu")
+												} else {
+													conn.query("INSERT IGNORE INTO CATEGORY value (?,?)", [meta[3].substring(0, 4), "Document_" + meta[3].substring(0, 4)])
+													meta.push(meta[3].substring(0, 4));
 												}
-												else{
-													conn.query("INSERT IGNORE INTO CATEGORY value (?,?)", [meta[3].substring(0,4), "Document_"+meta[3].substring(0,4)])
-													meta.push(meta[3].substring(0,4));}
 												// Archivé
 												meta.push(false)
 												// Supprimé
@@ -211,8 +215,7 @@ app.get("/nouveauDocument", async function (req, res) {
 												);
 											}
 										);
-									}
-									else if (data.meta.metadata === null && data.meta.info !== null){
+									} else if (data.meta.metadata === null && data.meta.info !== null) {
 										// console.log("INFO sans META")
 										var infos = []
 										// ID
@@ -230,12 +233,12 @@ app.get("/nouveauDocument", async function (req, res) {
 										if (data.meta.info.CreationDate === undefined)
 											infos.push(null)
 										else
-											infos.push(data.meta.info.CreationDate.substring(2,6)+'-'+data.meta.info.CreationDate.substring(6,8)+'-'+data.meta.info.CreationDate.substring(8,10));
+											infos.push(data.meta.info.CreationDate.substring(2, 6) + '-' + data.meta.info.CreationDate.substring(6, 8) + '-' + data.meta.info.CreationDate.substring(8, 10));
 										// Date Modif
-										if(data.meta.info.ModDate === undefined)
+										if (data.meta.info.ModDate === undefined)
 											infos.push(null)
 										else
-											infos.push(data.meta.info.ModDate.substring(2,6)+'-'+data.meta.info.ModDate.substring(6,8)+'-'+data.meta.info.ModDate.substring(8,10));
+											infos.push(data.meta.info.ModDate.substring(2, 6) + '-' + data.meta.info.ModDate.substring(6, 8) + '-' + data.meta.info.ModDate.substring(8, 10));
 										// Author
 										if (data.meta.info.Author === undefined)
 											infos.push(null)
@@ -246,9 +249,9 @@ app.get("/nouveauDocument", async function (req, res) {
 										// Link
 										infos.push(testFolder + file);
 										//keyword
-										if (data.meta.info.Keywords === undefined){
+										if (data.meta.info.Keywords === undefined) {
 											infos.push(null);
-										}else{
+										} else {
 											infos.push(data.meta.info.Keywords)
 										}
 										// Signature
@@ -256,12 +259,12 @@ app.get("/nouveauDocument", async function (req, res) {
 										// Rule
 										infos.push(10);
 										// Sub
-										if(infos[3] === null){
+										if (infos[3] === null) {
 											conn.query("INSERT IGNORE INTO CATEGORY value (?,?)", ["Inconnu", "Date_Document_Inconnu"])
-											infos.push("Inconnu")}
-										else{
-											conn.query("INSERT IGNORE INTO CATEGORY value (?,?)", [infos[3].substring(0,4), "Document_"+infos[3].substring(0,4)])
-											infos.push(infos[3].substring(0,4))
+											infos.push("Inconnu")
+										} else {
+											conn.query("INSERT IGNORE INTO CATEGORY value (?,?)", [infos[3].substring(0, 4), "Document_" + infos[3].substring(0, 4)])
+											infos.push(infos[3].substring(0, 4))
 										}
 										// Archivé
 										infos.push(false)
@@ -286,8 +289,7 @@ app.get("/nouveauDocument", async function (req, res) {
 												infos[13]
 											]
 										);
-									}
-									else{
+									} else {
 										console.log("RIEN")
 										var pasInfos = [];
 										// id_document VARCHAR(100) NOT NULL PRIMARY KEY,
@@ -305,7 +307,7 @@ app.get("/nouveauDocument", async function (req, res) {
 										//	size FLOAT NULL,
 										pasInfos.push(fileSize)
 										//	link VARCHAR(250) NULL,
-										pasInfos.push(testFolder+file)
+										pasInfos.push(testFolder + file)
 										//	keywords JSON NULL,
 										pasInfos.push(null)
 										//	signature VARCHAR(200) NULL,
@@ -346,6 +348,10 @@ app.get("/nouveauDocument", async function (req, res) {
 					});
 				})
 		})
+		res.send("Insertion OK")
+	}catch (err){
+		res.send(err)
+	}
 });
 
 app.get("/home", async function (req, res) {
