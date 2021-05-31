@@ -14,7 +14,7 @@ services:
       - MARIADB_PASS=GEDGROUPE4
       - MARIADB_DB=GED
     volumes:
-      - ./www/:/var/www/html/ # A REVERIFIER MAIS ON N'EN AURA PEUT-ETRE PAS BESOIN A LA FIN
+      - ./GED_PDF:/var/www/html # A REVERIFIER MAIS ON N'EN AURA PEUT-ETRE PAS BESOIN A LA FIN
     ports:
       - "30001:8080"
     container_name: ged-nodejs-app
@@ -49,6 +49,70 @@ services:
     volumes:
       - /sessions
     container_name: ged-phpmyadmin-app
+  # 4 - VUEJS CONTAINER
+  vuejs:
+    build:
+      context: ./src/front/ged-entp
+      dockerfile: Dockerfile
+    networks:
+      - frontend
+      - backend
+    volumes:
+      - ./www/:/var/www/html/ # A REVERIFIER MAIS ON N'EN AURA PEUT-ETRE PAS BESOIN A LA FIN
+    ports:
+      - "8080:8080"
+    container_name: ged-vuejs-app
+  # 5 - ELASTICSEARCH CONTAINER
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.0
+    container_name: ged-elasticsearch-app
+    environment:
+      - bootstrap.memory_lock=true
+      - discovery.type=single-node
+      - http.host=0.0.0.0
+      - network.host=0.0.0.0
+      - http.cors.allow-origin=*
+      - http.cors.enabled=true
+      - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
+      - http.cors.allow-credentials=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - data01:/usr/share/elasticsearch/data
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "9200:9200"
+    networks:
+      - backend
+      - frontend
+  # 6 - KIBANA CONTAINER
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.13.0
+    container_name: ged-kibana-app
+    ports:
+      - "5601:5601"
+    networks:
+      - backend
+    depends_on:
+      - elasticsearch
+  # 7 - LOGSTASH CONTAINER
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.13.0
+    container_name: ged-logstash-app
+    links:
+      - elasticsearch
+      - mariadb
+    networks:
+      - backend
+    volumes:
+      - ./src/back/config/logstash-mariadb.conf:/usr/share/logstash/config/logstash.conf
+      - ./src/back/config/mariadb-java-client-2.7.2.jar:/usr/share/logstash/logstash-core/lib/jars/mariadb-java-client-2.7.2.jar
+    command: logstash -f /usr/share/logstash/config/logstash.conf
+    depends_on:
+      - elasticsearch
+      - mariadb
 
 networks:
   frontend:
@@ -56,3 +120,4 @@ networks:
 
 volumes:
   db_data:
+  data01:
