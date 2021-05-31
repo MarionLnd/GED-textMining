@@ -2,11 +2,14 @@ const mariadb = require("mariadb/callback");
 const express = require("express");
 const PDFExtract = require("pdf.js-extract").PDFExtract;
 const fs = require("fs");
+const {pdfDigest} = require("pdf-signatures");
 const pdfExtract = new PDFExtract();
 const options = {}; /* see below */
 const testFolder = "/var/www/html/";
-
+const { preparePdf, HashAlgorithms } = require('pdf-signatures');
+const crypto = require('crypto');
 const app = express();
+
 const port = process.env.PORT || 8080;
 const mariadbHost = process.env.MARIADB_HOST || "localhost";
 const mariadbPort = process.env.MARIADB_PORT || "3306";
@@ -32,19 +35,29 @@ app.get("/nouveauDocument", async function (req, res) {
 						if (files !== undefined) {
 							files.forEach((file) => {
 								pdfExtract.extract(testFolder + file, options, (err, data) => {
-									if (err) return console.log(err);
+									function getFilesizeInBytes(filename) {
+										const stats = fs.statSync(filename);
+										const fileSizeInBytes = stats.size;
+										return fileSizeInBytes;
+									}
+									// console.log(console.log("Taille "+ file + getFilesizeInBytes(testFolder+file)))
+									const fileSize = getFilesizeInBytes(testFolder+file)
+									function generateChecksum(str, algorithm, encoding) {
+										return crypto
+											.createHash(algorithm || 'md5')
+											.update(str, 'utf8')
+											.digest(encoding || 'hex');
+									}
+									const checksum = generateChecksum(file);
 									if (data.meta.metadata !== null && data.meta.info !== null) {
-										console.log("META + INFO")
-										/*console.log(file)
-										console.log(data.meta.metadata)
-										console.log(data.meta.info)*/
+										// console.log("META + INFO")
 										Object.entries(data.meta.metadata).forEach(
 											([key, value]) => {
 												var donnees = [];
 												// ID
-												donnees.push(file);
+												donnees.push(file.trim());
 												// filename
-												donnees.push(file);
+												donnees.push(file.trim());
 												// Title
 												if (data.meta.metadata[key]["dc:title"] !== undefined && data.meta.info.Title === undefined)
 													donnees.push(data.meta.metadata[key]["dc:title"]);
@@ -70,25 +83,25 @@ app.get("/nouveauDocument", async function (req, res) {
 												else
 													donnees.push(null)
 												// Author
-												if (data.meta.metadata[key]["dc:creator"] !== undefined && data.meta.info.Author === undefined)
+												if ((data.meta.metadata[key]["dc:creator"] !== undefined && data.meta.info.Author === undefined) || (data.meta.metadata[key]["dc:creator"] !== undefined && data.meta.info.Author !== undefined))
 													donnees.push(data.meta.metadata[key]["dc:creator"]);
 												else if (data.meta.metadata[key]["dc:creator"] === undefined && data.meta.info.Author !== undefined)
 													donnees.push(data.meta.info.Author)
 												else
 													donnees.push(null)
 												// Size
-												donnees.push(null);
+												donnees.push(fileSize)
 												// Link
 												donnees.push(testFolder+file);
 												//Keywords
-												donnees.push(null);
+												// data.meta.info.keywords
+												if (data.meta.info.Keywords === undefined){
+													donnees.push(null);
+												}else{
+													donnees.push(data.meta.info.Keywords)
+												}
 												// Signature
-												if(data.pdfInfo === undefined)
-													donnees.push(null)
-												else if (data.pdfInfo.fingerprint === undefined )
-													donnees.push(null)
-												else
-													donnees.push(data.pdfInfo.fingerprint);
+												donnees.push(checksum)
 												//id_rule
 												donnees.push(10);
 												//id_category
@@ -126,24 +139,20 @@ app.get("/nouveauDocument", async function (req, res) {
 										);
 									}
 									else if (data.meta.metadata !== null && data.meta.info === null) {
-										console.log("META sans INFO")
-										/*console.log(file)
-										console.log(data.meta.metadata)
-										console.log(data.pdfInfo)*/
+										// console.log("META sans INFO")
 										Object.entries(data.meta.metadata).forEach(
 											([key, value]) => {
 												var meta = [];
 												// ID
-												meta.push(file);
+												meta.push(file.trim());
 												//Filename
-												meta.push(file);
+												meta.push(file.trim());
 												// Title
 												if (data.meta.metadata[key]["dc:title"] === undefined)
 													meta.push(null);
 												else meta.push(data.meta.metadata[key]["dc:title"]);
 												// Date Creation
 												console.log(file)
-												// console.log("Date Meta " + data.meta.metadata[key]["xmp:createdate"])
 												if (data.meta.metadata[key]["xmp:createdate"] === undefined)
 													meta.push(null);
 												else
@@ -159,18 +168,13 @@ app.get("/nouveauDocument", async function (req, res) {
 												else
 													meta.push(data.meta.metadata[key]["dc:creator"]);
 												// Size
-												meta.push(0);
+												meta.push(fileSize)
 												// Link
 												meta.push(testFolder + file);
 												// Keywords
 												meta.push(null);
 												// Signature
-												if(data.pdfInfo === undefined)
-													meta.push(null)
-												else if (data.pdfInfo.fingerprint === undefined )
-													meta.push(null)
-												else
-													meta.push(data.pdfInfo.fingerprint);
+												meta.push(checksum)
 												// ID-Rule
 												meta.push(10);
 												// ID Sub
@@ -209,15 +213,12 @@ app.get("/nouveauDocument", async function (req, res) {
 										);
 									}
 									else if (data.meta.metadata === null && data.meta.info !== null){
-										console.log("INFO sans META")
-										/*console.log(file)
-										console.log(data.meta.metadata)
-										console.log(data.pdfInfo)*/
+										// console.log("INFO sans META")
 										var infos = []
 										// ID
-										infos.push(file);
+										infos.push(file.trim());
 										// Filename
-										infos.push(file);
+										infos.push(file.trim());
 										// Title
 										if (data.meta.info.Title === undefined)
 											infos.push(null)
@@ -241,18 +242,17 @@ app.get("/nouveauDocument", async function (req, res) {
 										else
 											infos.push(data.meta.info.Author);
 										// Size
-										infos.push(0);
+										infos.push(fileSize)
 										// Link
 										infos.push(testFolder + file);
 										//keyword
-										infos.push(null);
+										if (data.meta.info.Keywords === undefined){
+											infos.push(null);
+										}else{
+											infos.push(data.meta.info.Keywords)
+										}
 										// Signature
-										if(data.pdfInfo === undefined)
-											infos.push(null)
-										else if (data.pdfInfo.fingerprint === undefined )
-											infos.push(null)
-										else
-											infos.push(data.pdfInfo.fingerprint);
+										infos.push(checksum)
 										// Rule
 										infos.push(10);
 										// Sub
@@ -289,14 +289,11 @@ app.get("/nouveauDocument", async function (req, res) {
 									}
 									else{
 										console.log("RIEN")
-										/*console.log(file)
-										console.log(data.meta.metadata)
-										console.log(data.pdfInfo)*/
 										var pasInfos = [];
-										//id_document VARCHAR(100) NOT NULL PRIMARY KEY,
-										pasInfos.push(file)
+										// id_document VARCHAR(100) NOT NULL PRIMARY KEY,
+										pasInfos.push(file.trim())
 										//	filename VARCHAR(250) NOT NULL,
-										pasInfos.push(file)
+										pasInfos.push(file.trim())
 										//	title VARCHAR(250) NULL,
 										pasInfos.push(null)
 										//	creation_date TIMESTAMP NULL,
@@ -306,21 +303,16 @@ app.get("/nouveauDocument", async function (req, res) {
 										//	author VARCHAR(100) NULL,
 										pasInfos.push(null)
 										//	size FLOAT NULL,
-										pasInfos.push(0)
+										pasInfos.push(fileSize)
 										//	link VARCHAR(250) NULL,
 										pasInfos.push(testFolder+file)
 										//	keywords JSON NULL,
 										pasInfos.push(null)
 										//	signature VARCHAR(200) NULL,
-										if(data.pdfInfo === undefined)
-											pasInfos.push(null)
-										else if (data.pdfInfo.fingerprint === undefined )
-											pasInfos.push(null)
-										else
-											pasInfos.push(data.pdfInfo.fingerprint);
+										pasInfos.push(checksum)
 										//	id_rule INT NULL,
 										pasInfos.push(10)
-										//	id_subcategory INT NULL,*/
+										//	id_subcategory INT NULL,
 										conn.query("INSERT IGNORE INTO CATEGORY value (?,?)", ["Inconnu", "Date_Document_Inconnu"])
 										pasInfos.push(null)
 										// Archivé
@@ -353,20 +345,7 @@ app.get("/nouveauDocument", async function (req, res) {
 						}
 					});
 				})
-				/*.then((res) => {
-					console.log(res);
-					conn.end();
-				})
-				.catch((err) => {
-					//handle error
-					console.error(err);
-					conn.end();
-				});*/
 		})
-		/*.catch((err) => {
-			//not connected
-			console.error("Error: Not connected - ", err);
-		});*/
 });
 
 app.get("/home", async function (req, res) {

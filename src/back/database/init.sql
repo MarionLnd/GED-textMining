@@ -52,7 +52,7 @@ CREATE TABLE DOCUMENT (
 	author VARCHAR(100) NULL,
 	size FLOAT NULL,
 	link VARCHAR(250) NULL,
-	keywords JSON NULL,
+	keywords varchar(500) NULL,
 	signature VARCHAR(200) NULL,
 	id_rule INT NULL,
 	id_category VARCHAR(100) NULL,

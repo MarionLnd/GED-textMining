@@ -10,9 +10,11 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"crypto": "^1.0.1",
 		"express": "^4.17.1",
-		"mariadb": "^2.5.3",
 		"fs": "^0.0.1-security",
+		"mariadb": "^2.5.3",
+		"pdf-signatures": "^0.1.0",
 		"pdf.js-extract": "^0.1.5"
 	}
 }
