@@ -7,3 +7,4 @@ src/back/package-lock.json
 
 www/
 GED_PDF/
+.DS_Store

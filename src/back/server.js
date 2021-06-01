@@ -41,9 +41,11 @@ app.use(cors());
 
 insertDocuments();
 
+const pool = mariadb.createPool(connectionOptions);
+
 // GET ALL DOCUMENTS
 app.get("/documents", async function (req, res) {
-	const pool = mariadb.createPool(connectionOptions);
+	//const pool = mariadb.createPool(connectionOptions);
 
 	let connection;
 	try {
@@ -61,14 +63,14 @@ app.get("/documents", async function (req, res) {
 		});
 	} catch (err) {
 		throw err;
-	} finally {
+	} /*finally {
 		if (connection) return connection.release();
-	}
+	}*/
 });
 
 // GET DOCUMENT BY ID
 app.get("/document/:id_document", async function (req, res) {
-	const pool = mariadb.createPool(connectionOptions);
+	//const pool = mariadb.createPool(connectionOptions);
 
 	let connection;
 	try {
@@ -90,14 +92,13 @@ app.get("/document/:id_document", async function (req, res) {
 		});
 	} catch (err) {
 		throw err;
-	} finally {
+	} /*finally {
 		if (connection) return connection.release();
-	}
+	}*/
 });
 
 //  UPDATE DOCUMENT BY ID
 app.put("/documentUpdate/:id_document", async (req, res) => {
-	const pool = mariadb.createPool(connectionOptions);
 	console.log("260    " + req.body);
 	console.log("260    " + req.body.filename);
 
@@ -110,8 +111,8 @@ app.put("/documentUpdate/:id_document", async (req, res) => {
 				console.log("connected ! connection id is " + conn.threadId);
 				conn.end(); //release to pool
 			}
-			let sql = "UPDATE DOCUMENT SET filename = ?, title = ?, author=?, id_rule=? WHERE id_document = ?";
-			let data = [req.body.filename, req.body.title, req.body.author, req.body.id_rule, req.params.id_document];
+			let sql = "UPDATE DOCUMENT SET filename = ?, title = ?, author=?, id_rule=?, keywords=? WHERE id_document = ?";
+			let data = [req.body.filename, req.body.title, req.body.author, req.body.id_rule, req.body.keywords, req.params.id_document];
 
 			conn.query(sql, data, (err, results) => {
 				if (err) throw err;
@@ -121,14 +122,14 @@ app.put("/documentUpdate/:id_document", async (req, res) => {
 		});
 	} catch (err) {
 		throw err;
-	} finally {
+	} /*finally {
 		if (connection) return connection.release();
-	}
+	}*/
 });
 
 // DELETE DOCUMENT BY ID
 app.delete("/deleteDocument/:id_document", async function (req, res) {
-	const pool = mariadb.createPool(connectionOptions);
+	//const pool = mariadb.createPool(connectionOptions);
 
 	let connection;
 	try {
@@ -139,30 +140,24 @@ app.delete("/deleteDocument/:id_document", async function (req, res) {
 				console.log("connected ! connection id is " + conn.threadId);
 				conn.end(); //release to pool
 			}
-			let sql = "delete from DOCUMENT where id_document=?"
-				let data = [req.params.id_document];
-	
-				conn.query(sql, data, (err, results) => {
-	
-					if (err) throw err;
-					console.log('Rows affected:', results.affectedRows);
-					res.status(200).json({ Result: "200 - table deleted" })
-	
-				});
+			let sql = "delete from DOCUMENT where id_document=?";
+			let data = [req.params.id_document];
 
+			conn.query(sql, data, (err, results) => {
+				if (err) throw err;
+				console.log("Rows affected:", results.affectedRows);
+				res.status(200).json({ Result: "200 - table deleted" });
+			});
 		});
-
-
 	} catch (err) {
 		throw err;
-	} finally {
+	} /*finally {
 		if (connection) return connection.release();
-	}
-		
+	}*/
 });
 // GET ALL RULES
 app.get("/rules", async function (req, res) {
-	const pool = mariadb.createPool(connectionOptions);
+	//const pool = mariadb.createPool(connectionOptions);
 
 	let connection;
 	try {
@@ -180,14 +175,14 @@ app.get("/rules", async function (req, res) {
 		});
 	} catch (err) {
 		throw err;
-	} finally {
+	} /*finally {
 		if (connection) return connection.release();
-	}
+	}*/
 });
 
 // GET ALL USERS
 app.get("/users", async function (req, res) {
-	const pool = mariadb.createPool(connectionOptions);
+	//const pool = mariadb.createPool(connectionOptions);
 
 	let connection;
 	try {
@@ -205,14 +200,14 @@ app.get("/users", async function (req, res) {
 		});
 	} catch (err) {
 		throw err;
-	} finally {
+	} /*finally {
 		if (connection) return connection.release();
-	}
+	}*/
 });
 
 // GET ALL ACTIONS
 app.get("/action", async function (req, res) {
-	const pool = mariadb.createPool(connectionOptions);
+	//const pool = mariadb.createPool(connectionOptions);
 
 	let connection;
 	try {
@@ -230,9 +225,9 @@ app.get("/action", async function (req, res) {
 		});
 	} catch (err) {
 		throw err;
-	} finally {
+	} /*finally {
 		if (connection) return connection.release();
-	}
+	}*/
 });
 
 app.get("/pdf", function (request, response) {
@@ -258,7 +253,7 @@ function generateChecksum(str, algorithm, encoding) {
 
 function insertDocuments() {
 	try {
-		const pool = mariadb.createPool(connectionOptions);
+		//const pool = mariadb.createPool(connectionOptions);
 		pool.getConnection((err, conn) => {
 			conn.query("SELECT 1 as val", (err, result) => {
 				/* Récupération des chemins fichier */

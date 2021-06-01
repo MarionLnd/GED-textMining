@@ -193,17 +193,15 @@ export default {
 			searchCriteria: "",
 			searchQuery: "",
 			isSearchButtonClicked: false,
-			privilege: String
+			privilege: String,
 		};
 	},
 	created() {
 		axios.get("http://localhost:30001/rules").then((response) => {
 			response.data.forEach((rule) => this.rules.push(rule));
 		});
-	},
-	mounted() {
 		this.privilege = this.$cookies.get("privileges");
-		console.log(this.privilege)
+		console.log(this.privilege);
 		this.moduleDa = [];
 		axios.get("http://localhost:30001/documents").then((response) => {
 			console.log(response.data);
@@ -268,6 +266,72 @@ export default {
 			});
 		});
 	},
+	mounted() {
+		/*this.privilege = this.$cookies.get("privileges");
+		console.log(this.privilege);
+		this.moduleDa = [];
+		axios.get("http://localhost:30001/documents").then((response) => {
+			console.log(response.data);
+			response.data.forEach((doc) => {
+				let deleteDate, archiveDate, dateA;
+
+				let rule = this.rules.filter((rule) => rule.id_rule === doc.id_rule)[0];
+				if (this.rules.filter((rule) => rule.id_rule === doc.id_rule).length === 1) {
+					deleteDate = new Date(this.formater(doc.creation_date));
+					deleteDate.setMonth(deleteDate.getMonth() + rule.delete_time);
+					archiveDate = new Date(this.formater(doc.creation_date));
+					// console.log(moment(test).format("YYYY-MM-DD"))
+					archiveDate.setMonth(archiveDate.getMonth() + rule.archive_time);
+					dateA = new Date();
+				}
+				this.moduleDa.push({
+					id_document: doc.id_document,
+					filename: doc.filename,
+					title: doc.title,
+					creation_date: doc.creation_date,
+					modification_date: doc.modification_date,
+					author: doc.author,
+					delete_rule: rule.delete_rule,
+					delete_time:
+						moment(archiveDate).format("YYYY-MM-DD") > moment(dateA).format("YYYY-MM-DD") === true ||
+						moment(deleteDate).format("YYYY-MM-DD") > moment(dateA).format("YYYY-MM-DD") === true
+							? deleteDate
+							: "",
+				});*/
+		/*this.rules.forEach((element) => {
+					if (doc.id_rule === element.id_rule) {
+						var deleteDate = new Date(this.formater(doc.creation_date));
+						deleteDate.setMonth(deleteDate.getMonth() + element.delete_time);
+						var archiveDate = new Date(this.formater(doc.creation_date));
+						// console.log(moment(test).format("YYYY-MM-DD"))
+						archiveDate.setMonth(archiveDate.getMonth() + element.archive_time);
+						var dateA = new Date();
+						console.log(
+							moment(dateA)
+								.format("YYYY-MM-DD")
+								.toString()
+						);
+						if (
+							moment(archiveDate).format("YYYY-MM-DD") > moment(dateA).format("YYYY-MM-DD") === true ||
+							moment(deleteDate).format("YYYY-MM-DD") > moment(dateA).format("YYYY-MM-DD") === true
+						) {
+							this.moduleDa.push({
+								id_document: doc.id_document,
+								filename: doc.filename,
+								title: doc.title,
+								creation_date: doc.creation_date,
+								modification_date: doc.modification_date,
+								author: doc.author,
+								delete_rule: element.delete_rule,
+								delete_time: deleteDate,
+							});
+						}
+						console.log(this.moduleDa);
+					}
+				});
+			});
+		});*/
+	},
 	methods: {
 		setCookie(id_doc) {
 			console.log(id_doc);
@@ -305,7 +369,7 @@ export default {
 			this.isSearchButtonClicked = true;
 			if (this.searchQuery !== "" && this.isSearchButtonClicked) {
 				this.searchQuery = this.searchQuery.toLowerCase();
-			
+
 				switch (this.searchCriteria) {
 					case "author":
 						this.searchByAuthor(this.searchQuery);

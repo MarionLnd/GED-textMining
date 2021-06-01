@@ -4,6 +4,7 @@ services:
   nodejs:
     build:
       context: ./src/back/
+    restart: always
     image: marionlnd/ged-script
     networks:
       - frontend
@@ -12,7 +13,7 @@ services:
       - MARIADB_HOST=ged-mariadb-app
       - MARIADB_DB=GED
     volumes:
-      - ./GED_PDF:/var/www/html # A REVERIFIER MAIS ON N'EN AURA PEUT-ETRE PAS BESOIN A LA FIN
+      - ./GED_PDF:/var/www/html
     ports:
       - "30001:8080"
     container_name: ged-nodejs-app

@@ -10,7 +10,7 @@
 					</div>
 					<div class="form-group">
 						<label>Titre</label>
-						<input type="text" class="form-control" aria-describedby="emailHelp" :value="[[info.title]]" id="title"  />
+						<input type="text" class="form-control" aria-describedby="emailHelp" :value="[[info.title]]" id="title" />
 					</div>
 					<div class="form-group">
 						<label>Date de creation</label>
@@ -18,7 +18,7 @@
 					</div>
 					<div class="form-group">
 						<label>Date de modification</label>
-						<input type="text" class="form-control" aria-describedby="emailHelp" :value="[[info.modification_date]]" id="dateM" disabled/>
+						<input type="text" class="form-control" aria-describedby="emailHelp" :value="[[info.modification_date]]" id="dateM" disabled />
 					</div>
 					<div class="form-group">
 						<label>Auteur</label>
@@ -59,7 +59,6 @@
 						</select>
 					</div>
 					<div class="form-group" v-if="archive">
-					
 						<select class="form-control" id="rule">
 							<option v-for="rule in archiveRule" :key="rule">
 								{{ rule.description }}
@@ -67,7 +66,6 @@
 						</select>
 					</div>
 					<div class="form-group" v-if="supp">
-						
 						<select class="form-control" id="rule">
 							<option v-for="rule in deleteRule" :key="rule" :value="rule.id_rule">
 								{{ rule.description }}
@@ -75,7 +73,7 @@
 						</select>
 					</div>
 					<div class="form-group">
-						<input type="button" @click="update()" value="Modifier"  />
+						<input type="button" @click="update()" value="Modifier" />
 					</div>
 				</div>
 			</form>
@@ -108,7 +106,7 @@ export default {
 			sendForm: false,
 		};
 	},
-	mounted() {
+	created() {
 		//GET RULES
 		axios.get("http://localhost:30001/rules").then((rule) => {
 			rule.data.forEach((element) => {
@@ -201,14 +199,14 @@ export default {
 						.toString(),
 					author: document.getElementById("auteur").value,
 					id_rule: document.getElementById("rule").value,
+					keywords: document.getElementById("keyword").value,
 				})
 				.then(function(response) {
 					console.log(response);
-					
+
 					this.sendForm = true;
-					
 				});
-				this.$router.push("/folder");
+			this.$router.push("/folder");
 		},
 		getVal() {
 			if (document.getElementById("supprimer").checked) {
